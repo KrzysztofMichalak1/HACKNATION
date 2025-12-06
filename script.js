@@ -115,10 +115,6 @@ document.addEventListener('DOMContentLoaded', () => {
         db.ref("gameState").on("value", (snapshot) => {
             const newGameData = snapshot.val();
             if (newGameData && newGameData.status === "PLAYING") {
-                // Detach lobby listeners once game starts
-                db.ref("players").off();
-                db.ref("gameState").off();
-                
                 gameData = newGameData; // Zapisz nowe dane gry
                 startGameUI();
             }
@@ -180,6 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================
 
     function startGameUI() {
+        // Detach lobby listeners to prevent them from running during the game
+        db.ref("players").off();
+        db.ref("gameState").off();
+
         lobbyScreen.classList.add('d-none');
         gameScreen.classList.remove('d-none');
         
@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Render influence messages
         influenceResultText.innerHTML = '';
-        if (roll.influences) {
+        if (roll.influences) { // Show influences during and after the roll
             Object.values(roll.influences).forEach(influence => {
                 const p = document.createElement('p');
                 p.className = 'mb-0 text-warning';
@@ -516,6 +516,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const roll = state.currentRoll;
             const turnPlayerId = state.turnOrder[state.currentPlayerIndex];
             const player = fullState.players[turnPlayerId];
+
+            // Safeguard against missing player/bet data
+            if (!player || !player.bet) {
+                console.error("CRITICAL: Player or player.bet is missing in finalizeTurn for player:", turnPlayerId);
+                // Just advance the turn without scoring to prevent getting stuck
+                const updates = {
+                    '/gameState/currentRoll/isRolling': false,
+                    '/gameState/currentPlayerIndex': (state.currentPlayerIndex + 1) % state.turnOrder.length
+                };
+                db.ref().update(updates);
+                return;
+            }
             
             // Calculate result
             let win = false;
