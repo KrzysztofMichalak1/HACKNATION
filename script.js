@@ -5,7 +5,18 @@
 // --- TUTAJ WKLEJ SWÓJ KOD Z FIREBASE (const firebaseConfig = ...) ---
 // Pamiętaj o dodaniu databaseURL jeśli go nie ma!
 const firebaseConfig = {
-    // ... wklej tutaj swoje klucze ...
+  apiKey: "AIzaSyCaZ7FQh8YR8lKNCoUrers8JaBmuTa64Ys",
+  authDomain: "sqad-dice.firebaseapp.com",
+  
+  // --- I ADDED THIS LINE FOR YOU ---
+  databaseURL: "https://sqad-dice-default-rtdb.europe-west1.firebasedatabase.app",
+  // --------------------------------
+  
+  projectId: "sqad-dice",
+  storageBucket: "sqad-dice.firebasestorage.app",
+  messagingSenderId: "738671011090",
+  appId: "1:738671011090:web:021d25ba0ad62d4e50ffcb",
+  measurementId: "G-JCCCWQHF9K"
 };
 
 // Inicjalizacja
