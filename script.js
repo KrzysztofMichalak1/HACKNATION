@@ -283,8 +283,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }, costInterval);
         
         // --- Nowa animacja zwalniająca ---
-        const randomSpinsX = Math.floor(Math.random() * 5 + 8); // 8-13 obrotów
-        const randomSpinsY = Math.floor(Math.random() * 5 + 8);
+        const randomSpinsX = Math.floor(Math.random() * 5 + 4); // 4-9 obrotów
+        const randomSpinsY = Math.floor(Math.random() * 5 + 4);
 
         const finalAngle = getRotationForFace(state.currentRoll.finalValue);
 
