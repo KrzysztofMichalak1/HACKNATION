@@ -155,13 +155,14 @@ body {
     margin-bottom: 2rem;
     min-width: 350px;
     /* Removed min-height here as content will dictate height */
+    min-height: 600px;;
 }
 
 #dice-info-section {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: flex-start; /* Align text to the left */
+    align-items: center; /* Align text to the left */
     flex: 1; /* Allow left section to grow and take available space */
     padding-right: 1rem; /* Add some spacing between sections */
     max-width: 400px; /* Force the influence controls to wrap */
@@ -178,7 +179,7 @@ body {
     color: var(--lotto-yellow);
     font-size: 1.2rem;
     width: 100%; /* Ensure it takes full width of its container */
-    text-align: left; /* Align text to the left */
+    text-align: center; /* Align text to the left */
 }
 
 #influence-controls {
@@ -190,7 +191,6 @@ body {
     flex-wrap: wrap; /* Allow items to wrap to the next line */
     width: 100%; /* Ensure it takes full width of its container */
 }
-
 .influence-player-controls {
     max-width: 180px; /* Constrain width to encourage wrapping */
     text-align: center; /* Center content within the control */
@@ -206,10 +206,10 @@ body {
 }
 
 .scene {
-    width: 200px; /* Increased size for a bigger dice */
-    height: 200px; /* Increased size for a bigger dice */
+    width: 400px; /* Increased size for a bigger dice */
+    height: 400px; /* Increased size for a bigger dice */
     margin: 20px auto;
-    perspective: 1000px; /* Adjusted perspective for bigger dice */
+    perspective: 2000px; /* Adjusted perspective for bigger dice */
 }
 
 .cube {
@@ -221,25 +221,25 @@ body {
 
 .face {
     position: absolute;
-    width: 200px; /* Increased size */
-    height: 200px; /* Increased size */
-    line-height: 200px; /* Increased size */
-    font-size: 5rem; /* Increased font size */
+    width: 400px; /* Increased size */
+    height: 400px; /* Increased size */
+    line-height: 400px; /* Increased size */
+    font-size: 10rem; /* Increased font size */
     font-weight: bold;
     text-align: center;
     color: var(--lotto-text-dark);
     background-color: var(--lotto-yellow);
     border: 3px solid var(--lotto-blue);
-    border-radius: 20px;
+    border-radius: 0px; /* Increased border-radius for more rounded edges */
     box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
 }
 
-.front  { transform: translateZ(100px); } /* Adjusted for new size */
-.back   { transform: rotateY(180deg) translateZ(100px); } /* Adjusted for new size */
-.right  { transform: rotateY(90deg) translateZ(100px); } /* Adjusted for new size */
-.left   { transform: rotateY(-90deg) translateZ(100px); } /* Adjusted for new size */
-.top    { transform: rotateX(90deg) translateZ(100px); } /* Adjusted for new size */
-.bottom { transform: rotateX(-90deg) translateZ(100px); } /* Adjusted for new size */
+.front  { transform: translateZ(200px); } /* Adjusted for new size */
+.back   { transform: rotateY(180deg) translateZ(200px); } /* Adjusted for new size */
+.right  { transform: rotateY(90deg) translateZ(200px); } /* Adjusted for new size */
+.left   { transform: rotateY(-90deg) translateZ(200px); } /* Adjusted for new size */
+.top    { transform: rotateX(90deg) translateZ(200px); } /* Adjusted for new size */
+.bottom { transform: rotateX(-90deg) translateZ(200px); } /* Adjusted for new size */
 
 /* --- Influence Controls --- */
 .influence-btn {
