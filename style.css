@@ -12,6 +12,7 @@ body {
     background-color: var(--lotto-light-gray);
     font-family: 'Arial', sans-serif;
     zoom: 0.8;
+    overflow-y: scroll; /* Always show scrollbar to prevent layout shifts */
 }
 
 .container {
@@ -88,6 +89,10 @@ body {
 #game-info {
     background-color: var(--lotto-text-light);
     border-left: 5px solid var(--lotto-yellow);
+    min-height: 80px; /* Reserve space to prevent layout shifts */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* --- Player Cards --- */
@@ -147,18 +152,38 @@ body {
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: 1.5rem; /* Reduced padding */
+    padding-bottom: 0rem; /* Reduced padding */
+    margin-bottom: 1rem;
+    min-width: 350px; /* Reduced min-width to make the box thinner */
+    min-height: 600px; /* Reduced min-height */;
 }
 #dice-roller-info {
     color: var(--lotto-yellow);
-    font-size: 1.5rem;
+    font-size: 1.2rem; /* Reduced font size */
 }
 
-/* --- Kostka 3D --- */
+#influence-controls {
+    min-height: 60px; /* Reduced height */
+    display: flex;
+    gap: 15px; /* Reduced gap */
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#influence-result-text, #true-value-text {
+    min-height: 20px; /* Reduced height */
+    overflow: hidden;
+    margin-top: 5px; /* Reduced margin */
+    font-size: 0.9rem; /* Reduced font size */
+}
+
 .scene {
-    width: 180px;
-    height: 180px;
-    margin: 40px auto;
-    perspective: 800px;
+    width: 120px; /* Reduced size */
+    height: 120px; /* Reduced size */
+    margin: 20px auto; /* Reduced margin */
+    perspective: 600px;
 }
 
 .cube {
@@ -170,25 +195,25 @@ body {
 
 .face {
     position: absolute;
-    width: 180px;
-    height: 180px;
-    line-height: 180px;
-    font-size: 5rem;
+    width: 120px; /* Reduced size */
+    height: 120px; /* Reduced size */
+    line-height: 120px; /* Reduced size */
+    font-size: 3.5rem; /* Reduced font size */
     font-weight: bold;
     text-align: center;
     color: var(--lotto-text-dark);
     background-color: var(--lotto-yellow);
-    border: 4px solid var(--lotto-blue);
-    border-radius: 25px;
-    box-shadow: inset 0 0 15px rgba(0,0,0,0.2);
+    border: 3px solid var(--lotto-blue);
+    border-radius: 20px;
+    box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
 }
 
-.front  { transform: translateZ(90px); }
-.back   { transform: rotateY(180deg) translateZ(90px); }
-.right  { transform: rotateY(90deg) translateZ(90px); }
-.left   { transform: rotateY(-90deg) translateZ(90px); }
-.top    { transform: rotateX(90deg) translateZ(90px); }
-.bottom { transform: rotateX(-90deg) translateZ(90px); }
+.front  { transform: translateZ(60px); } /* Adjusted for new size */
+.back   { transform: rotateY(180deg) translateZ(60px); } /* Adjusted for new size */
+.right  { transform: rotateY(90deg) translateZ(60px); } /* Adjusted for new size */
+.left   { transform: rotateY(-90deg) translateZ(60px); } /* Adjusted for new size */
+.top    { transform: rotateX(90deg) translateZ(60px); } /* Adjusted for new size */
+.bottom { transform: rotateX(-90deg) translateZ(60px); } /* Adjusted for new size */
 
 /* --- Influence Controls --- */
 .influence-btn {
