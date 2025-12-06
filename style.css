@@ -11,8 +11,8 @@
 body {
     background-color: var(--lotto-light-gray);
     font-family: 'Arial', sans-serif;
-    zoom: 0.8;
     overflow-y: scroll; /* Always show scrollbar to prevent layout shifts */
+    zoom: 0.8;
 }
 
 .container {
@@ -270,4 +270,8 @@ body {
 }
 .btn-close {
     filter: invert(1) grayscale(100%) brightness(200%);
+}
+.modal-backdrop {
+    transform: scale(1.25);
+    transform-origin: top left;
 }
