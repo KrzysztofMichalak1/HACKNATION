@@ -36,34 +36,42 @@ body {
     margin-right: 1rem;
 }
 
-/* Stylizacja kostki */
-.dice {
-    font-size: 5rem;
-    font-weight: bold;
+/* Stylizacja kostki 3D */
+.scene {
+    width: 120px;
+    height: 120px;
+    margin: 20px auto;
+    perspective: 400px;
+}
+
+.cube {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    transform-style: preserve-3d;
+}
+
+.face {
+    position: absolute;
     width: 120px;
     height: 120px;
     line-height: 120px;
+    font-size: 5rem;
+    font-weight: bold;
     text-align: center;
-    border-radius: 20px;
-    background-color: #ffffff;
     color: #212529;
-    margin: 20px auto;
+    background-color: rgba(255, 255, 255, 0.95);
     border: 3px solid #dee2e6;
-    transition: transform 0.2s ease;
+    border-radius: 20px;
 }
 
-#dice-animation.rolling {
-    animation: roll 0.2s infinite alternate;
-}
+.front  { transform: translateZ(60px); }
+.back   { transform: rotateY(180deg) translateZ(60px); }
+.right  { transform: rotateY(90deg) translateZ(60px); }
+.left   { transform: rotateY(-90deg) translateZ(60px); }
+.top    { transform: rotateX(90deg) translateZ(60px); }
+.bottom { transform: rotateX(-90deg) translateZ(60px); }
 
-@keyframes roll {
-    from {
-        transform: rotate(0deg) scale(1);
-    }
-    to {
-        transform: rotate(15deg) scale(1.05);
-    }
-}
 
 .influence-btn {
     min-width: 80px;

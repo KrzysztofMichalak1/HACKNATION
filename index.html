@@ -72,7 +72,16 @@
                  <!-- Centralny obszar rzutu kostką -->
                  <div id="dice-roll-area" class="mt-4 p-5 bg-dark text-white rounded text-center d-none">
                     <h3 id="dice-roller-info"></h3>
-                    <div id="dice-animation" class="dice">?</div>
+                    <div class="scene">
+                        <div id="dice-animation" class="cube">
+                            <div class="face front">1</div>
+                            <div class="face back">6</div>
+                            <div class="face right">2</div>
+                            <div class="face left">5</div>
+                            <div class="face top">3</div>
+                            <div class="face bottom">4</div>
+                        </div>
+                    </div>
                     <p class="mt-3">Koszt wpływu: <span id="influence-cost">0</span> PLN</p>
                     <div id="influence-controls" class="d-flex gap-2 justify-content-center mt-3">
                         <!-- Przyciski wpływu zostaną dodane przez JS -->

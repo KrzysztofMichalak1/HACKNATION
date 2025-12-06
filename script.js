@@ -40,6 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
             influenceCost: 0,
             influencedBy: [],
             influences: [],
+            animation: {
+                finalX: 0,
+                finalY: 0,
+            }
         },
         turnOrder: [],
     };
@@ -129,10 +133,27 @@ document.addEventListener('DOMContentLoaded', () => {
         renderPlayerCards();
 
         diceRollArea.classList.remove('d-none');
-        diceAnimationEl.textContent = '?';
+        // Reset kostki do pozycji początkowej bez animacji
+        diceAnimationEl.style.transition = 'none'; 
+        const initialAngle = getRotationForFace(1);
+        diceAnimationEl.style.transform = `rotateX(${initialAngle.x}deg) rotateY(${initialAngle.y}deg)`;
+        
         diceRollerInfo.textContent = 'Oczekiwanie na pierwszy zakład';
         
         startTurn();
+    }
+
+    // --- Funkcje pomocnicze dla kostki 3D ---
+    function getRotationForFace(face) {
+        switch (face) {
+            case 1: return { x: 0, y: 0 };    // front
+            case 2: return { x: 0, y: -90 };   // right
+            case 3: return { x: -90, y: 0 };  // top
+            case 4: return { x: 90, y: 0 };   // bottom
+            case 5: return { x: 0, y: 90 };    // left
+            case 6: return { x: 0, y: 180 };   // back
+            default: return { x: 0, y: 0 };
+        }
     }
 
     // --- Główna logika gry ---
@@ -237,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function rollDiceForPlayer(playerId) {
         const player = state.players.find(p => p.id === playerId);
         gameInfoEl.textContent = `Losowanie kostki gracza: ${player.name}`;
-        
+
         // Reset stanu rzutu
         state.currentRoll.isRolling = true;
         state.currentRoll.rollerId = playerId;
@@ -254,7 +275,6 @@ document.addEventListener('DOMContentLoaded', () => {
         renderInfluenceControls();
         document.addEventListener('keydown', handleKeyPress);
 
-        // Uruchomienie interwału kosztu
         const rollDuration = 8000;
         const costInterval = 1000;
         state.currentRoll.influenceInterval = setInterval(() => {
@@ -263,30 +283,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }, costInterval);
         
         // --- Nowa animacja zwalniająca ---
-        let delay = 50; // Początkowe opóźnienie
-        let startTime = Date.now();
+        const randomSpinsX = Math.floor(Math.random() * 5 + 8); // 8-13 obrotów
+        const randomSpinsY = Math.floor(Math.random() * 5 + 8);
 
-        function slowingAnimation() {
-            // Zmień cyfrę
-            diceAnimationEl.textContent = Math.floor(Math.random() * 6) + 1;
-            
-            // Sprawdź czy czas animacji nie dobiegł końca
-            if (Date.now() - startTime < rollDuration) {
-                delay *= 1.1; // Zwiększ opóźnienie, aby spowolnić
-                state.currentRoll.animationTimeout = setTimeout(slowingAnimation, delay);
-            }
-        };
-        slowingAnimation();
-        // --- Koniec nowej animacji ---
+        const finalAngle = getRotationForFace(state.currentRoll.finalValue);
 
-        // Główny Timeout, który kończy cały rzut
-        setTimeout(() => {
-            clearTimeout(state.currentRoll.animationTimeout); // Zatrzymaj pętlę animacji
+        state.currentRoll.animation.finalX = (randomSpinsX * 360) + finalAngle.x;
+        state.currentRoll.animation.finalY = (randomSpinsY * 360) + finalAngle.y;
+        
+        diceAnimationEl.style.transition = `transform ${rollDuration / 1000}s cubic-bezier(.15, .9, .3, 1)`;
+        diceAnimationEl.style.transform = `rotateX(${state.currentRoll.animation.finalX}deg) rotateY(${state.currentRoll.animation.finalY}deg)`;
+        // --- Koniec animacji ---
+
+        state.currentRoll.animationTimeout = setTimeout(() => {
             state.currentRoll.isRolling = false;
             document.removeEventListener('keydown', handleKeyPress);
             clearInterval(state.currentRoll.influenceInterval);
             
-            diceAnimationEl.textContent = state.currentRoll.baseValue;
             influenceControlsEl.innerHTML = '<p>Czas na wpływ minął!</p>';
 
             if (state.currentRoll.baseValue !== state.currentRoll.finalValue) {
@@ -335,8 +348,10 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentRoll.influencedBy.push(influencerId);
         updateBudgetUI();
 
-        let finalVal = state.currentRoll.finalValue;
+        const oldValue = state.currentRoll.finalValue;
+        let finalVal = oldValue;
         let actionText = '';
+
         if (influenceType === 'add') {
             finalVal++;
             actionText = 'dodał +1';
@@ -346,9 +361,23 @@ document.addEventListener('DOMContentLoaded', () => {
             actionText = 'odjął -1';
         }
         
-        if (finalVal > 6) finalVal = 6;
-        if (finalVal < 1) finalVal = 1;
+        if (finalVal > 6) finalVal = 1; // Wrap around
+        if (finalVal < 1) finalVal = 6; // Wrap around
         state.currentRoll.finalValue = finalVal;
+
+        // Aktualizacja animacji
+        const oldAngle = getRotationForFace(oldValue);
+        const newAngle = getRotationForFace(finalVal);
+
+        // Oblicz różnicę, aby dodać ją do obecnej animacji
+        const diffX = newAngle.x - oldAngle.x;
+        const diffY = newAngle.y - oldAngle.y;
+
+        state.currentRoll.animation.finalX += diffX;
+        state.currentRoll.animation.finalY += diffY;
+        
+        // Zastosuj nową docelową rotację. Aktywna tranzycja płynnie zmieni kurs.
+        diceAnimationEl.style.transform = `rotateX(${state.currentRoll.animation.finalX}deg) rotateY(${state.currentRoll.animation.finalY}deg)`;
 
         state.currentRoll.influences.push({ influencerName: influencer.name, action: actionText, cost: cost });
         influenceResultText.innerHTML += `<div><small>${influencer.name} ${actionText} (koszt: ${cost})</small></div>`;
