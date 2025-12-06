@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const influenceResultText = document.getElementById('influence-result-text');
     const trueValueText = document.getElementById('true-value-text');
     const btnInfluencePlus = document.getElementById('btn-influence-plus');
-    const btnInfluenceMinus = document.getElementById('btn-influence-minus');
+    const btnInfluenceMinus = document.getElementById('btn-influence-minus'); 
 
     // Historia
     const historyModal = document.getElementById('historyModal');
@@ -434,7 +434,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Handle final result text visibility
         trueValueText.innerHTML = "";
-        if (!roll.isRolling && roll.baseValue !== roll.finalValue) {
+        if (!roll.isRolling) { // Always show final result when roll is over
             trueValueText.innerHTML = `Ostateczny wynik: <span class="text-warning fw-bold">${roll.finalValue}</span>`;
         }
         
