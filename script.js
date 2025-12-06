@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const influenceCostEl = document.getElementById('influence-cost');
     const influenceControlsEl = document.getElementById('influence-controls');
     const influenceResultText = document.getElementById('influence-result-text');
+    const trueValueText = document.getElementById('true-value-text');
 
 
     // --- Stan Gry ---
@@ -39,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
             influenceInterval: null,
             animationTimeout: null,
             influenceCost: 0,
+            totalInfluenceCost: 0,
             influencedBy: [],
             influences: [],
             animation: {
@@ -218,7 +220,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playersContainer.innerHTML = '';
         state.players.forEach(player => {
             const playerCard = document.createElement('div');
-            playerCard.className = 'mb-4';
+            playerCard.className = 'col-6 mb-4';
             playerCard.innerHTML = `
                 <div class="player-card" id="player-card-${player.id}" data-player-id="${player.id}">
                     <h5 class="card-title">${player.name}</h5>
@@ -322,9 +324,11 @@ document.addEventListener('DOMContentLoaded', () => {
         state.currentRoll.finalValue = state.currentRoll.baseValue;
         state.currentRoll.influenceCost = 0;
         influenceCostEl.textContent = '0';
+        state.currentRoll.totalInfluenceCost = 0;
         state.currentRoll.influencedBy = [];
         state.currentRoll.influences = [];
         influenceResultText.innerHTML = '';
+        trueValueText.innerHTML = '';
 
         diceRollerInfo.textContent = `Rzut dla ${player.name}`;
         diceRollArea.classList.remove('d-none');
@@ -358,8 +362,14 @@ document.addEventListener('DOMContentLoaded', () => {
             
             influenceControlsEl.innerHTML = '<p>Czas na wpływ minął!</p>';
 
+            // Zastosuj koszt i zaktualizuj UI po zakończeniu rzutu
+            state.sharedBudget -= state.currentRoll.totalInfluenceCost;
+            updateBudgetUI();
+
             if (state.currentRoll.baseValue !== state.currentRoll.finalValue) {
-                influenceResultText.textContent = `Wynik przed manipulacją: ${state.currentRoll.baseValue}, po manipulacji: ${state.currentRoll.finalValue}`;
+                trueValueText.innerHTML = `Prawdziwy wynik: <span class="fw-bold text-warning">${state.currentRoll.finalValue}</span>`;
+            } else {
+                trueValueText.innerHTML = '';
             }
             
             evaluateBet(playerId);
@@ -395,14 +405,15 @@ document.addEventListener('DOMContentLoaded', () => {
     function handleInfluence(influencerId, influenceType) {
         if (!state.currentRoll.isRolling || state.currentRoll.influencedBy.includes(influencerId)) return;
         const cost = state.currentRoll.influenceCost;
-        if (state.sharedBudget < cost) {
+        if (state.sharedBudget - state.currentRoll.totalInfluenceCost < cost) {
             alert('Niewystarczający budżet, aby wpłynąć na rzut!');
             return;
         }
         const influencer = state.players.find(p => p.id === influencerId);
-        state.sharedBudget -= cost;
+        
+        state.currentRoll.totalInfluenceCost += cost;
         state.currentRoll.influencedBy.push(influencerId);
-        updateBudgetUI();
+        // updateBudgetUI(); // Usunięto natychmiastową aktualizację
 
         const oldValue = state.currentRoll.finalValue;
         let finalVal = oldValue;
@@ -421,22 +432,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (finalVal < 1) finalVal = 6; // Wrap around
         state.currentRoll.finalValue = finalVal;
 
-        // Aktualizacja animacji
-        const oldAngle = getRotationForFace(oldValue);
-        const newAngle = getRotationForFace(finalVal);
-
-        // Oblicz różnicę, aby dodać ją do obecnej animacji
-        const diffX = newAngle.x - oldAngle.x;
-        const diffY = newAngle.y - oldAngle.y;
-
-        state.currentRoll.animation.finalX += diffX;
-        state.currentRoll.animation.finalY += diffY;
-        
-        // Zastosuj nową docelową rotację. Aktywna tranzycja płynnie zmieni kurs.
-        diceAnimationEl.style.transform = `rotateX(${state.currentRoll.animation.finalX}deg) rotateY(${state.currentRoll.animation.finalY}deg)`;
+        // Aktualizacja animacji - USUNIĘTE
 
         state.currentRoll.influences.push({ influencerName: influencer.name, action: actionText, cost: cost });
         influenceResultText.innerHTML += `<div><small>${influencer.name} ${actionText} (koszt: ${cost})</small></div>`;
+        // trueValueText.innerHTML = `Prawdziwy wynik: <span class="fw-bold text-warning">${state.currentRoll.finalValue}</span>`; // Usunięto natychmiastową aktualizację
+
         document.querySelectorAll(`.btn-group[data-influencer-id="${influencerId}"] .influence-btn`).forEach(btn => {
             btn.disabled = true;
             btn.classList.add('btn-success');
@@ -451,7 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
         if (bet.type === 'even' && result % 2 === 0) win = true;
         if (bet.type === 'odd' && result % 2 !== 0) win = true;
         if (bet.type === 'number' && result === bet.value) win = true;
-        let outcomeMessage = `Wyrzucono: ${state.currentRoll.baseValue}. Wynik końcowy: ${result}. `;
+        
+        let outcomeMessage = `Na kostce: ${state.currentRoll.baseValue}. Wynik końcowy (po wpływach): ${result}. `;
         if (win) {
             const amount = bet.type === 'number' ? 50 : 10;
             state.sharedBudget += amount;

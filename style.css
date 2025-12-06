@@ -11,10 +11,11 @@
 body {
     background-color: var(--lotto-light-gray);
     font-family: 'Arial', sans-serif;
+    zoom: 0.8;
 }
 
 .container {
-    max-width: 1000px;
+    /* max-width: 1000px; */
 }
 
 /* --- Setup & Config Screens --- */
