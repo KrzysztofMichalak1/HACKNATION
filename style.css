@@ -202,7 +202,7 @@ body {
     margin-top: 5px;
     font-size: 0.9rem;
     width: 100%; /* Ensure it takes full width of its container */
-    text-align: left; /* Align text to the left */
+    text-align: center; /* Align text to the left */
 }
 
 .scene {
