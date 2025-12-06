@@ -218,7 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
         playersContainer.innerHTML = '';
         state.players.forEach(player => {
             const playerCard = document.createElement('div');
-            playerCard.className = 'col-md-6 col-lg-3 mb-4';
+            playerCard.className = 'mb-4';
             playerCard.innerHTML = `
                 <div class="player-card" id="player-card-${player.id}" data-player-id="${player.id}">
                     <h5 class="card-title">${player.name}</h5>
@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div class="input-group mt-2">
                             <input type="number" class="form-control bet-number" min="1" max="6" placeholder="Liczba" disabled>
-                            <button class="btn btn-outline-secondary confirm-bet-btn" disabled>Zatwierdź</button>
+                            <button class="btn btn-primary confirm-bet-btn" disabled>Zatwierdź</button>
                         </div>
                         <div class="bet-info mt-2 text-muted">Oczekuje...</div>
                     </div>
@@ -376,8 +376,8 @@ document.addEventListener('DOMContentLoaded', () => {
             influenceWrapper.innerHTML = `
                 <small>${p.name}</small>
                 <div class="btn-group" data-influencer-id="${p.id}">
-                    <button class="btn btn-sm btn-secondary influence-btn" data-type="add" ${!canInfluence ? 'disabled' : ''}>+1 <small class="text-muted">(${p.controls.plus})</small></button>
-                    <button class="btn btn-sm btn-secondary influence-btn" data-type="sub" ${!canInfluence ? 'disabled' : ''}>-1 <small class="text-muted">(${p.controls.minus})</small></button>
+                    <button class="btn btn-sm btn-primary influence-btn" data-type="add" ${!canInfluence ? 'disabled' : ''}>+1 <small class="text-muted">(${p.controls.plus})</small></button>
+                    <button class="btn btn-sm btn-primary influence-btn" data-type="sub" ${!canInfluence ? 'disabled' : ''}>-1 <small class="text-muted">(${p.controls.minus})</small></button>
                 </div>
             `;
             influenceControlsEl.appendChild(influenceWrapper);
