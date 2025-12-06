@@ -176,6 +176,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================
 
     function startGameUI() {
+        // Detach lobby listeners to prevent them from running during the game
+        db.ref("players").off();
+        db.ref("gameState").off();
+
         lobbyScreen.classList.add('d-none');
         gameScreen.classList.remove('d-none');
         
@@ -452,16 +456,12 @@ document.addEventListener('DOMContentLoaded', () => {
         diceAnimationEl.style.transition = `transform ${rollDuration / 1000}s cubic-bezier(.15, .9, .3, 1)`;
         diceAnimationEl.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`;
 
+        // After animation, just leave the dice on the base value face.
+        // The final result text will show the truth.
         localState.animationTimeout = setTimeout(() => {
-            // After animation, snap to the true final value from the database
-            db.ref('gameState/currentRoll/finalValue').once('value', snapshot => {
-                const finalValue = snapshot.val();
-                if (finalValue) {
-                    const correctAngle = getRotationForFace(finalValue);
-                    diceAnimationEl.style.transition = 'none'; // Snap instantly to the correct face
-                    diceAnimationEl.style.transform = `rotateX(${correctAngle.x}deg) rotateY(${correctAngle.y}deg)`;
-                }
-            });
+            const correctAngle = getRotationForFace(baseValue);
+            diceAnimationEl.style.transition = 'none';
+            diceAnimationEl.style.transform = `rotateX(${correctAngle.x}deg) rotateY(${correctAngle.y}deg)`;
         }, rollDuration);
     }
 
