@@ -165,7 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 finalValue: 1,
                 influenceCost: 0,
                 totalInfluenceCost: 0,
-                influencedBy: []
+                influencedBy: [],
+                influences: null
             }
         });
     });
@@ -365,6 +366,7 @@ document.addEventListener('DOMContentLoaded', () => {
             influenceCost: 0,
             totalInfluenceCost: 0,
             influencedBy: [],
+            influences: null // Reset influence messages
         });
         
         // Ustaw timer kosztu wpływu (tylko host)
@@ -415,6 +417,17 @@ document.addEventListener('DOMContentLoaded', () => {
         btnInfluencePlus.disabled = !canInfluence;
         btnInfluenceMinus.disabled = !canInfluence;
 
+        // Render influence messages
+        influenceResultText.innerHTML = '';
+        if (roll.isRolling && roll.influences) {
+            Object.values(roll.influences).forEach(influence => {
+                const p = document.createElement('p');
+                p.className = 'mb-0 text-warning';
+                p.innerHTML = `<small>${influence.influencerName} wpłynął na rzut: ${influence.action}</small>`;
+                influenceResultText.appendChild(p);
+            });
+        }
+        
         // Ensure trueValueText is empty during roll
         trueValueText.innerHTML = "";
         
@@ -427,7 +440,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const rollDuration = 8000;
         const randomSpinsX = Math.floor(Math.random() * 5 + 4);
         const randomSpinsY = Math.floor(Math.random() * 5 + 4);
-        const finalAngle = getRotationForFace(baseValue); // Początkowo celuj w bazową wartość
+        const finalAngle = getRotationForFace(baseValue); // Animate towards the base value
 
         const finalX = (randomSpinsX * 360) + finalAngle.x;
         const finalY = (randomSpinsY * 360) + finalAngle.y;
@@ -440,7 +453,7 @@ document.addEventListener('DOMContentLoaded', () => {
         diceAnimationEl.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`;
 
         localState.animationTimeout = setTimeout(() => {
-            // Po zakończeniu animacji, ustaw kostkę na ostateczną wartość z bazy
+            // After animation, snap to the true final value from the database
             db.ref('gameState/currentRoll/finalValue').once('value', snapshot => {
                 const finalValue = snapshot.val();
                 if (finalValue) {
@@ -458,14 +471,18 @@ document.addEventListener('DOMContentLoaded', () => {
             return alert("Za mało pieniędzy w kasie!");
         }
 
-        // Oznacz, że wpłynąłeś na rzut
+        // Mark that this player has influenced the roll
         db.ref(`gameState/currentRoll/influencedBy`).transaction(list => {
             list = list || [];
             list.push(myId);
             return list;
         });
+        
+        // Add the influence action to the list for display
+        const influenceData = { influencerName: myName, action: amount > 0 ? '+1' : '-1' };
+        db.ref('gameState/currentRoll/influences').push(influenceData);
 
-        // Zmodyfikuj wartość kostki
+        // Modify the dice value
         db.ref(`gameState/currentRoll/finalValue`).transaction(val => {
             let newVal = (val || 1) + amount;
             if (newVal > 6) return 1;
@@ -473,13 +490,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return newVal;
         });
 
-        // Odejmij koszt od budżetu i dodaj do kosztu całkowitego
-        db.ref(`gameState`).transaction(state => {
-            if(state){
-                state.sharedBudget -= currentCost;
-                state.currentRoll.totalInfluenceCost += currentCost;
-            }
-            return state;
+        // Subtract the cost from the budget
+        db.ref(`gameState/sharedBudget`).transaction(budget => {
+            return (budget || 0) - currentCost;
         });
     }
 
@@ -495,14 +508,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
         db.ref().once("value").then(snapshot => {
             const fullState = snapshot.val();
-            if(!fullState || !fullState.gameState || !fullState.gameState.currentRoll.isRolling) return; // Zapobieganie podwójnemu wykonaniu
+            if(!fullState || !fullState.gameState || !fullState.gameState.currentRoll.isRolling) return; // Prevent double execution
             
             const state = fullState.gameState;
             const roll = state.currentRoll;
             const turnPlayerId = state.turnOrder[state.currentPlayerIndex];
             const player = fullState.players[turnPlayerId];
             
-            // Oblicz wynik
+            // Calculate result
             let win = false;
             if (player.bet.type === 'even' && roll.finalValue % 2 === 0) win = true;
             if (player.bet.type === 'odd' && roll.finalValue % 2 !== 0) win = true;
@@ -511,6 +524,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const prize = win ? (player.bet.type === 'number' ? 50 : 10) : -5;
             const budgetChange = prize;
 
+            // Build the final outcome message
             let outcomeMessage = `Na kostce: ${roll.baseValue}.`;
             if (roll.baseValue !== roll.finalValue) {
                 outcomeMessage += ` Wynik końcowy (po wpływach): ${roll.finalValue}.`;
@@ -519,7 +533,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             outcomeMessage += ` ${player.name} ${win ? `wygrywa! +${prize} PLN` : `przegrywa. -5 PLN`}`;
             
-            // Zapisz historię
+            // Save to history
             const historyEntry = { rollerName: player.name, fullMessage: outcomeMessage };
             db.ref('gameState/rollHistory').transaction(history => {
                 history = history || [];
@@ -527,17 +541,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 return history;
             });
             
-            // Przygotuj aktualizację do bazy
+            // Prepare database updates
             let updates = {};
             updates['/gameState/sharedBudget'] = state.sharedBudget + budgetChange;
             updates['/gameState/currentRoll/isRolling'] = false;
             updates['/gameState/lastResultMessage'] = outcomeMessage;
             
-            // Przejdź do następnego gracza lub rundy
+            // Move to next player or round
             let nextIndex = state.currentPlayerIndex + 1;
             if (nextIndex >= state.turnOrder.length) {
                 updates['/gameState/round'] = state.round + 1;
-                // Reset wszystkich graczy na nową rundę
+                // Reset all players for the new round
                 state.turnOrder.forEach(pid => {
                     updates[`/players/${pid}/hasPlacedBet`] = false;
                     updates[`/players/${pid}/bet`] = null;
