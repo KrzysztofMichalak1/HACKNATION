@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } else {
             const turnMessage = player ? `Tura gracza: ${player.name}. Wybierz i zatwierdź swój zakład.` : 'Czekam na gracza...';
             if (gameData.lastResultMessage) {
-                gameInfoEl.innerHTML = `<div>${turnMessage}</div><hr class="my-2"><p class="text-muted mb-0"><small>Ostatni wynik: ${gameData.lastResultMessage}</small></p>`;
+                gameInfoEl.innerHTML = `<div>${turnMessage}</div><hr class="my-2"><p class="text-muted mb-0"><small>${gameData.lastResultMessage}</small></p>`;
             } else {
                 gameInfoEl.textContent = turnMessage;
             }
@@ -415,12 +415,8 @@ document.addEventListener('DOMContentLoaded', () => {
         btnInfluencePlus.disabled = !canInfluence;
         btnInfluenceMinus.disabled = !canInfluence;
 
-        // Wynik w czasie rzeczywistym
-        if (roll.isRolling && roll.baseValue !== roll.finalValue) {
-            trueValueText.innerHTML = `Aktualny wynik: <span class="fw-bold text-warning">${roll.finalValue}</span>`;
-        } else {
-            trueValueText.innerHTML = "";
-        }
+        // Ensure trueValueText is empty during roll
+        trueValueText.innerHTML = "";
         
         lastIsRollingState = roll.isRolling;
     }
@@ -515,7 +511,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const prize = win ? (player.bet.type === 'number' ? 50 : 10) : -5;
             const budgetChange = prize;
 
-            const outcomeMessage = `Na kostce: ${roll.baseValue}. Wynik końcowy: ${roll.finalValue}. ${player.name} ${win ? `wygrywa! +${prize} PLN` : `przegrywa. -5 PLN`}`;
+            let outcomeMessage = `Na kostce: ${roll.baseValue}.`;
+            if (roll.baseValue !== roll.finalValue) {
+                outcomeMessage += ` Wynik końcowy (po wpływach): ${roll.finalValue}.`;
+            } else {
+                outcomeMessage += ` Wynik końcowy: ${roll.finalValue}.`;
+            }
+            outcomeMessage += ` ${player.name} ${win ? `wygrywa! +${prize} PLN` : `przegrywa. -5 PLN`}`;
             
             // Zapisz historię
             const historyEntry = { rollerName: player.name, fullMessage: outcomeMessage };
