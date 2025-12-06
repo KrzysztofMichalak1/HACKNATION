@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================
 
     function startGameUI() {
-        // Detach lobby listeners to prevent them from running during the game
+        // *** CRITICAL FIX: Detach lobby listeners to prevent them from running during the game ***
         db.ref("players").off();
         db.ref("gameState").off();
 
