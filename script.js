@@ -115,6 +115,10 @@ document.addEventListener('DOMContentLoaded', () => {
         db.ref("gameState").on("value", (snapshot) => {
             const newGameData = snapshot.val();
             if (newGameData && newGameData.status === "PLAYING") {
+                // Detach lobby listeners once game starts
+                db.ref("players").off();
+                db.ref("gameState").off();
+                
                 gameData = newGameData; // Zapisz nowe dane gry
                 startGameUI();
             }
@@ -176,10 +180,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // ======================================================
 
     function startGameUI() {
-        // Detach lobby listeners to prevent them from running during the game
-        db.ref("players").off();
-        db.ref("gameState").off();
-
         lobbyScreen.classList.add('d-none');
         gameScreen.classList.remove('d-none');
         
@@ -423,7 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Render influence messages
         influenceResultText.innerHTML = '';
-        if (roll.isRolling && roll.influences) {
+        if (roll.influences) {
             Object.values(roll.influences).forEach(influence => {
                 const p = document.createElement('p');
                 p.className = 'mb-0 text-warning';
@@ -432,8 +432,11 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
         
-        // Ensure trueValueText is empty during roll
+        // Handle final result text visibility
         trueValueText.innerHTML = "";
+        if (!roll.isRolling && roll.baseValue !== roll.finalValue) {
+            trueValueText.innerHTML = `Ostateczny wynik: <span class="text-warning fw-bold">${roll.finalValue}</span>`;
+        }
         
         lastIsRollingState = roll.isRolling;
     }
@@ -456,8 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
         diceAnimationEl.style.transition = `transform ${rollDuration / 1000}s cubic-bezier(.15, .9, .3, 1)`;
         diceAnimationEl.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`;
 
-        // After animation, just leave the dice on the base value face.
-        // The final result text will show the truth.
+        // After animation, ensure the dice visually rests on the base value face.
         localState.animationTimeout = setTimeout(() => {
             const correctAngle = getRotationForFace(baseValue);
             diceAnimationEl.style.transition = 'none';
@@ -534,7 +536,7 @@ document.addEventListener('DOMContentLoaded', () => {
             outcomeMessage += ` ${player.name} ${win ? `wygrywa! +${prize} PLN` : `przegrywa. -5 PLN`}`;
             
             // Save to history
-            const historyEntry = { rollerName: player.name, fullMessage: outcomeMessage };
+            const historyEntry = { rollerName: player.name, fullMessage: outcomeMessage, influences: roll.influences };
             db.ref('gameState/rollHistory').transaction(history => {
                 history = history || [];
                 history.push(historyEntry);
@@ -583,7 +585,20 @@ document.addEventListener('DOMContentLoaded', () => {
         [...history].reverse().forEach(entry => {
             const listItem = document.createElement('li');
             listItem.className = 'list-group-item';
-            listItem.innerHTML = `<div><strong>${entry.rollerName}:</strong> ${entry.fullMessage}</div>`;
+            
+            let influencesHTML = '';
+            if (entry.influences) {
+                influencesHTML += '<ul class="list-unstyled mt-2 mb-0">';
+                Object.values(entry.influences).forEach(influence => {
+                    influencesHTML += `<li><small class="text-muted ps-3">&rarr; ${influence.influencerName} wpłynął na rzut: ${influence.action}</small></li>`;
+                });
+                influencesHTML += '</ul>';
+            }
+
+            listItem.innerHTML = `
+                <div><strong>${entry.rollerName}:</strong> ${entry.fullMessage}</div>
+                ${influencesHTML}
+            `;
             list.appendChild(listItem);
         });
         historyLog.appendChild(list);
