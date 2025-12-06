@@ -481,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         
         // Add the influence action to the list for display
-        const influenceData = { influencerName: myName, action: amount > 0 ? '+1' : '-1' };
+        const influenceData = { influencerName: myName, action: amount > 0 ? '+1' : '-1', cost: currentCost };
         db.ref('gameState/currentRoll/influences').push(influenceData);
 
         // Modify the dice value
@@ -490,11 +490,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (newVal > 6) return 1;
             if (newVal < 1) return 6;
             return newVal;
-        });
-
-        // Subtract the cost from the budget
-        db.ref(`gameState/sharedBudget`).transaction(budget => {
-            return (budget || 0) - currentCost;
         });
     }
 
@@ -536,22 +531,28 @@ document.addEventListener('DOMContentLoaded', () => {
             if (player.bet.type === 'number' && roll.finalValue === player.bet.value) win = true;
 
             const prize = win ? (player.bet.type === 'number' ? 50 : 10) : -5;
-            const budgetChange = prize;
-
-            // Build the final outcome message
-            let outcomeMessage = `Na kostce: ${roll.baseValue}.`;
-            if (roll.baseValue !== roll.finalValue) {
-                outcomeMessage += ` Wynik końcowy (po wpływach): ${roll.finalValue}.`;
-            } else {
-                outcomeMessage += ` Wynik końcowy: ${roll.finalValue}.`;
+            
+            let totalInfluenceCost = 0;
+            if(roll.influences) {
+                totalInfluenceCost = Object.values(roll.influences).reduce((sum, inf) => sum + inf.cost, 0);
             }
-            outcomeMessage += ` ${player.name} ${win ? `wygrywa! +${prize} PLN` : `przegrywa. -5 PLN`}`;
+            
+            const budgetChange = prize - totalInfluenceCost;
+
+            const turnSummary = {
+                prize: `Wygrana/Przegrana z zakładu: ${prize > 0 ? '+' : ''}${prize} PLN`,
+                cost: `Koszt wpływu: -${totalInfluenceCost} PLN`,
+                total: `Suma: ${budgetChange > 0 ? '+' : ''}${budgetChange} PLN`
+            };
+
+            let outcomeMessage = `Na kostce: ${roll.baseValue}. Wynik końcowy: ${roll.finalValue}. ${player.name} ${win ? `wygrywa` : `przegrywa`}.`;
             
             // Save to history
             const historyEntry = { 
                 rollerName: player.name, 
                 fullMessage: outcomeMessage, 
-                influences: roll.influences ?? null // *** CRITICAL FIX: Ensure influences is not undefined ***
+                influences: roll.influences ?? null,
+                summary: turnSummary
             };
             db.ref('gameState/rollHistory').transaction(history => {
                 history = history || [];
@@ -564,6 +565,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updates['/gameState/sharedBudget'] = state.sharedBudget + budgetChange;
             updates['/gameState/currentRoll/isRolling'] = false;
             updates['/gameState/lastResultMessage'] = outcomeMessage;
+            updates['/gameState/currentRoll/turnSummary'] = turnSummary;
             
             // Move to next player or round
             let nextIndex = state.currentPlayerIndex + 1;
@@ -606,7 +608,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (entry.influences) {
                 influencesHTML += '<ul class="list-unstyled mt-2 mb-0">';
                 Object.values(entry.influences).forEach(influence => {
-                    influencesHTML += `<li><small class="text-muted ps-3">&rarr; ${influence.influencerName} wpłynął na rzut: ${influence.action}</small></li>`;
+                    influencesHTML += `<li><small class="text-muted ps-3">&rarr; ${influence.influencerName} wpłynął na rzut: ${influence.action} (koszt: ${influence.cost} PLN)</small></li>`;
                 });
                 influencesHTML += '</ul>';
             }
