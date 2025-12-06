@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const influenceControlsEl = document.getElementById('influence-controls');
     const influenceResultText = document.getElementById('influence-result-text');
     const trueValueText = document.getElementById('true-value-text');
+    const influenceTimerMessageEl = document.getElementById('influence-timer-message');
 
 
     // --- Stan Gry ---
@@ -197,6 +198,13 @@ document.addEventListener('DOMContentLoaded', () => {
         diceAnimationEl.style.transform = `rotateX(${initialAngle.x}deg) rotateY(${initialAngle.y}deg)`;
         
         diceRollerInfo.textContent = 'Oczekiwanie na pierwszy zakład';
+        influenceTimerMessageEl.style.display = 'none'; // Ensure message is hidden
+        influenceControlsEl.style.display = 'flex'; // Ensure controls are visible
+        
+        // Initially disable all influence buttons
+        document.querySelectorAll('.influence-btn').forEach(btn => btn.disabled = true);
+        
+        renderInfluenceControls(); // Call to render influence buttons initially
         
         startTurn();
     }
@@ -332,6 +340,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         diceRollerInfo.textContent = `Rzut dla ${player.name}`;
         diceRollArea.classList.remove('d-none');
+        influenceTimerMessageEl.style.display = 'none'; // Ensure message is hidden
+        influenceControlsEl.style.display = 'flex'; // Ensure controls are visible
         renderInfluenceControls();
         document.addEventListener('keydown', handleKeyPress);
 
@@ -360,7 +370,12 @@ document.addEventListener('DOMContentLoaded', () => {
             document.removeEventListener('keydown', handleKeyPress);
             clearInterval(state.currentRoll.influenceInterval);
             
-            influenceControlsEl.innerHTML = '<p>Czas na wpływ minął!</p>';
+            // Disable all influence buttons after influence period
+            document.querySelectorAll('.influence-btn').forEach(btn => btn.disabled = true);
+
+            influenceControlsEl.style.display = 'none'; // Hide controls
+            influenceTimerMessageEl.style.display = 'block'; // Show message
+            influenceTimerMessageEl.innerHTML = 'Czas na wpływ minął!';
 
             // Zastosuj koszt i zaktualizuj UI po zakończeniu rzutu
             state.sharedBudget -= state.currentRoll.totalInfluenceCost;
@@ -382,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
         state.players.forEach(p => {
             const canInfluence = state.currentRoll.rollerId !== p.id;
             const influenceWrapper = document.createElement('div');
-            influenceWrapper.className = 'd-flex flex-column align-items-center';
+            influenceWrapper.className = 'd-flex flex-column align-items-center influence-player-controls';
             influenceWrapper.innerHTML = `
                 <small>${p.name}</small>
                 <div class="btn-group" data-influencer-id="${p.id}">

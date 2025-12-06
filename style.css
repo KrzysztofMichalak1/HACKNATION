@@ -148,42 +148,68 @@ body {
     background-color: var(--lotto-blue);
     color: var(--lotto-text-light);
     border-radius: 1rem;
+    display: flex; /* Use flexbox for two columns */
+    justify-content: space-around; /* Distribute space between sections */
+    align-items: center;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    min-width: 350px;
+    /* Removed min-height here as content will dictate height */
+}
+
+#dice-info-section {
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
-    padding: 1.5rem; /* Reduced padding */
-    padding-bottom: 0rem; /* Reduced padding */
-    margin-bottom: 1rem;
-    min-width: 350px; /* Reduced min-width to make the box thinner */
-    min-height: 600px; /* Reduced min-height */;
+    align-items: flex-start; /* Align text to the left */
+    flex: 1; /* Allow left section to grow and take available space */
+    padding-right: 1rem; /* Add some spacing between sections */
+    max-width: 400px; /* Force the influence controls to wrap */
 }
+
+#dice-animation-section {
+    flex-shrink: 0; /* Prevent the dice section from shrinking */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 #dice-roller-info {
     color: var(--lotto-yellow);
-    font-size: 1.2rem; /* Reduced font size */
+    font-size: 1.2rem;
+    width: 100%; /* Ensure it takes full width of its container */
+    text-align: left; /* Align text to the left */
 }
 
 #influence-controls {
-    min-height: 60px; /* Reduced height */
-    display: flex;
-    gap: 15px; /* Reduced gap */
-    justify-content: center;
+    min-height: 100px; /* Increased min-height to accommodate two rows */
+    display: flex; /* Use flexbox for wrapping items */
+    gap: 15px; /* Adjust gap between items */
+    justify-content: flex-start; /* Align items to the start */
     align-items: center;
-    flex-wrap: wrap;
+    flex-wrap: wrap; /* Allow items to wrap to the next line */
+    width: 100%; /* Ensure it takes full width of its container */
+}
+
+.influence-player-controls {
+    max-width: 180px; /* Constrain width to encourage wrapping */
+    text-align: center; /* Center content within the control */
 }
 
 #influence-result-text, #true-value-text {
-    min-height: 20px; /* Reduced height */
+    min-height: 20px;
     overflow: hidden;
-    margin-top: 5px; /* Reduced margin */
-    font-size: 0.9rem; /* Reduced font size */
+    margin-top: 5px;
+    font-size: 0.9rem;
+    width: 100%; /* Ensure it takes full width of its container */
+    text-align: left; /* Align text to the left */
 }
 
 .scene {
-    width: 120px; /* Reduced size */
-    height: 120px; /* Reduced size */
-    margin: 20px auto; /* Reduced margin */
-    perspective: 600px;
+    width: 200px; /* Increased size for a bigger dice */
+    height: 200px; /* Increased size for a bigger dice */
+    margin: 20px auto;
+    perspective: 1000px; /* Adjusted perspective for bigger dice */
 }
 
 .cube {
@@ -195,10 +221,10 @@ body {
 
 .face {
     position: absolute;
-    width: 120px; /* Reduced size */
-    height: 120px; /* Reduced size */
-    line-height: 120px; /* Reduced size */
-    font-size: 3.5rem; /* Reduced font size */
+    width: 200px; /* Increased size */
+    height: 200px; /* Increased size */
+    line-height: 200px; /* Increased size */
+    font-size: 5rem; /* Increased font size */
     font-weight: bold;
     text-align: center;
     color: var(--lotto-text-dark);
@@ -208,12 +234,12 @@ body {
     box-shadow: inset 0 0 10px rgba(0,0,0,0.2);
 }
 
-.front  { transform: translateZ(60px); } /* Adjusted for new size */
-.back   { transform: rotateY(180deg) translateZ(60px); } /* Adjusted for new size */
-.right  { transform: rotateY(90deg) translateZ(60px); } /* Adjusted for new size */
-.left   { transform: rotateY(-90deg) translateZ(60px); } /* Adjusted for new size */
-.top    { transform: rotateX(90deg) translateZ(60px); } /* Adjusted for new size */
-.bottom { transform: rotateX(-90deg) translateZ(60px); } /* Adjusted for new size */
+.front  { transform: translateZ(100px); } /* Adjusted for new size */
+.back   { transform: rotateY(180deg) translateZ(100px); } /* Adjusted for new size */
+.right  { transform: rotateY(90deg) translateZ(100px); } /* Adjusted for new size */
+.left   { transform: rotateY(-90deg) translateZ(100px); } /* Adjusted for new size */
+.top    { transform: rotateX(90deg) translateZ(100px); } /* Adjusted for new size */
+.bottom { transform: rotateX(-90deg) translateZ(100px); } /* Adjusted for new size */
 
 /* --- Influence Controls --- */
 .influence-btn {
