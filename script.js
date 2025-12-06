@@ -23,6 +23,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // --- Stan Gry ---
+    let assignedKeys = new Set();
     let state = {
         players: [],
         sharedBudget: 100,
@@ -51,6 +52,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Nowy przepływ startu gry ---
 
     function showKeyConfigScreen() {
+        assignedKeys.clear(); // Clear previously assigned keys on re-entry
         const playerCount = parseInt(playerCountSelect.value, 10);
         state.players = [];
         keyConfigForms.innerHTML = '';
@@ -85,14 +87,32 @@ document.addEventListener('DOMContentLoaded', () => {
             keyConfigForms.appendChild(form);
         }
 
+        // Apply default key assignments after creating player forms
+        setDefaultKeyAssignments();
+
         document.querySelectorAll('.key-input').forEach(input => {
             input.addEventListener('keydown', (e) => {
                 e.preventDefault();
-                const key = e.key === ' ' ? 'Space' : e.key;
-                input.value = key;
+                const newKey = e.key === ' ' ? 'Space' : e.key;
                 const playerId = parseInt(input.dataset.playerId, 10);
                 const action = input.dataset.action;
-                state.players.find(p => p.id === playerId).controls[action] = key;
+                const player = state.players.find(p => p.id === playerId);
+                const oldKey = player.controls[action];
+
+                if (assignedKeys.has(newKey) && newKey !== oldKey) {
+                    alert(`Klawisz "${newKey}" jest już przypisany! Proszę wybrać inny.`);
+                    return;
+                }
+
+                // Zwolnij stary klawisz, jeśli istniał
+                if (oldKey && assignedKeys.has(oldKey)) {
+                    assignedKeys.delete(oldKey);
+                }
+                
+                // Przypisz nowy klawisz
+                input.value = newKey;
+                player.controls[action] = newKey;
+                assignedKeys.add(newKey);
 
                 const allKeyInputs = Array.from(document.querySelectorAll('.key-input'));
                 const currentIndex = allKeyInputs.indexOf(input);
@@ -118,6 +138,42 @@ document.addEventListener('DOMContentLoaded', () => {
         
         keyConfigScreen.classList.add('d-none');
         initializeGameBoard();
+    }
+
+    function setDefaultKeyAssignments() {
+        assignedKeys.clear(); // Clear all previously assigned keys
+
+        const defaultKeyMap = {
+            1: { plus: 'q', minus: 'a' },
+            2: { plus: 'w', minus: 's' },
+            3: { plus: 'e', minus: 'd' },
+            4: { plus: 'r', minus: 'f' },
+            5: { plus: 't', minus: 'g' }, // Example for more players
+            6: { plus: 'y', minus: 'h' },
+        };
+
+        state.players.forEach(player => {
+            const playerDefaults = defaultKeyMap[player.id];
+            if (playerDefaults) {
+                player.controls.plus = playerDefaults.plus;
+                player.controls.minus = playerDefaults.minus;
+                assignedKeys.add(player.controls.plus);
+                assignedKeys.add(player.controls.minus);
+            } else {
+                // Fallback for more players if needed, or handle error
+                console.warn(`No default keys defined for player ${player.id}`);
+            }
+        });
+
+        // Update the UI
+        document.querySelectorAll('.key-input').forEach(input => {
+            const playerId = parseInt(input.dataset.playerId, 10);
+            const action = input.dataset.action;
+            const player = state.players.find(p => p.id === playerId);
+            if (player && player.controls[action]) {
+                input.value = player.controls[action];
+            }
+        });
     }
 
     function initializeGameBoard() {
@@ -474,6 +530,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Event Listeners ---
     startGameBtn.addEventListener('click', showKeyConfigScreen);
     confirmKeysBtn.addEventListener('click', saveKeysAndStartGame);
+    document.getElementById('set-default-keys-btn').addEventListener('click', setDefaultKeyAssignments);
 
     const historyModal = document.getElementById('historyModal');
     const historyLog = document.getElementById('history-log');
