@@ -3,31 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hacknation Multiplayer</title>
+    <title>Hacknation Multiplayer Test</title>
     <link rel="stylesheet" href="style.css">
-    
-    <!-- Firebase SDKs (Required for online play) -->
+
+    <!-- Firebase Libraries (Version 8 - easiest for Hackathons) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 <body>
 
-    <!-- LOGIN SCREEN -->
+    <!-- 1. The Login Screen -->
     <div id="login-screen">
         <h1>Hacknation Game</h1>
-        <p>Enter your name to join the lobby:</p>
-        <input type="text" id="username" placeholder="Player Name" maxlength="10">
+        <p>Enter your name to join:</p>
+        <input type="text" id="username" placeholder="Your Name">
         <button onclick="joinGame()">JOIN GAME</button>
     </div>
 
-    <!-- GAME SCREEN (Hidden initially) -->
+    <!-- 2. The Game Screen (Hidden by default) -->
     <div id="game-container" style="display:none;">
         <canvas id="gameCanvas" width="800" height="600"></canvas>
-        <div id="ui-layer">
-            <p>Use Arrow Keys to Move</p>
-        </div>
+        <div class="controls-hint">Use Arrow Keys or WASD to move</div>
     </div>
 
+    <!-- Link to your script -->
     <script src="script.js"></script>
 </body>
 </html>
