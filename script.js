@@ -548,7 +548,11 @@ document.addEventListener('DOMContentLoaded', () => {
             outcomeMessage += ` ${player.name} ${win ? `wygrywa! +${prize} PLN` : `przegrywa. -5 PLN`}`;
             
             // Save to history
-            const historyEntry = { rollerName: player.name, fullMessage: outcomeMessage, influences: roll.influences };
+            const historyEntry = { 
+                rollerName: player.name, 
+                fullMessage: outcomeMessage, 
+                influences: roll.influences ?? null // *** CRITICAL FIX: Ensure influences is not undefined ***
+            };
             db.ref('gameState/rollHistory').transaction(history => {
                 history = history || [];
                 history.push(historyEntry);
