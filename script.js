@@ -18,6 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const db = firebase.database();
 
+    // Max cost for influence
+    const MAX_INFLUENCE_COST = 15;
+
     // ======================================================
     // 2. ZMIENNE GLOBALNE I ELEMENTY DOM
     // ======================================================
@@ -478,7 +481,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!roll) return;
 
         // Aktualizuj UI na podstawie danych z bazy
-        influenceCostEl.textContent = roll.influenceCost || 0;
+        const currentInfluenceCost = roll.influenceCost || 0;
         // const rollerName = playersData[roll.rollerId]?.name || '';
         diceRollerInfo.textContent = '';
 
@@ -501,9 +504,17 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Logika przycisków wpływu
-        const canInfluence = roll.isRolling && myId !== roll.rollerId && !(roll.influencedBy || []).includes(myId);
-        btnInfluencePlus.disabled = !canInfluence;
-        btnInfluenceMinus.disabled = !canInfluence;
+        const canInfluence = roll.isRolling && myId !== roll.rollerId && !(roll.influencedBy || []).includes(myId) && currentInfluenceCost < MAX_INFLUENCE_COST;
+
+        if (currentInfluenceCost >= MAX_INFLUENCE_COST) {
+            influenceCostEl.textContent = 'Za pozno na wplywanie';
+            btnInfluencePlus.disabled = true;
+            btnInfluenceMinus.disabled = true;
+        } else {
+            influenceCostEl.textContent = `Koszt Wpływy: ${currentInfluenceCost}`;
+            btnInfluencePlus.disabled = !canInfluence;
+            btnInfluenceMinus.disabled = !canInfluence;
+        }
 
         // Render influence messages
         influenceResultText.innerHTML = '';
