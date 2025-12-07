@@ -256,8 +256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!gameData || !gameData.turnOrder || !playersData) return;
         
         if (gameData.currentRoll.isRolling) {
-            const rollerName = playersData[gameData.currentRoll.rollerId]?.name || '';
-            gameInfoEl.textContent = `Losowanie kostki gracza: ${rollerName}. Możesz wpłynąć na wynik!`;
+            gameInfoEl.textContent = ''; // Removed "Losowanie kostki gracza: ..."
             gameInfoEl.className = "alert alert-warning text-center fw-bold";
         } else {
             gameInfoEl.innerHTML = renderRoundSummary(gameData.rollHistory);
