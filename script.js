@@ -447,7 +447,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 roundSummaryEl.innerHTML = `
                     <p class="mb-0 ${prizeColor}"><small>${roll.turnSummary.prize.text}</small></p>
                     <p class="mb-0 text-warning"><small>${roll.turnSummary.cost.text}</small></p>
-                    <p class="fw-bold fs-5 ${totalColor}">${roll.turnSummary.total.text}</p>
+                    <p class="fw-bold fs-3 ${totalColor}">${roll.turnSummary.total.text}</p>
                 `;
             }
         }
