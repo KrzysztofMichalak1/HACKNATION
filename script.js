@@ -589,9 +589,9 @@ document.addEventListener('DOMContentLoaded', () => {
             let betWinnings = 0;
             if (win) {
                 if (player.bet.type === 'number') {
-                    betWinnings = 45;
+                    betWinnings = 60;
                 } else { // even or odd
-                    betWinnings = 15;
+                    betWinnings = 30;
                 }
             }
 
