@@ -231,23 +231,37 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (gameData.sharedBudget < 100) sharedBudgetEl.classList.add('text-danger', 'fw-bold');
     }
 
+    function renderRoundSummary(history) {
+        let summaryHTML = '<div class="d-flex justify-content-center gap-2 flex-wrap">';
+        const historyToShow = (history || []).slice(-10); // Show last 10 rounds
+
+        if (historyToShow.length === 0) {
+            summaryHTML += '<p class="text-muted">Brak historii do wyświetlenia.</p>';
+        } else {
+            historyToShow.forEach(entry => {
+                const value = entry.summary.total.value;
+                const colorClass = value >= 0 ? 'bg-success' : 'bg-danger';
+                summaryHTML += `
+                    <div class="summary-square ${colorClass} text-white d-flex align-items-center justify-content-center">
+                        ${value > 0 ? '+' : ''}${value}
+                    </div>
+                `;
+            });
+        }
+        summaryHTML += '</div>';
+        return summaryHTML;
+    }
+
     function updateGameInfo() {
         if (!gameData || !gameData.turnOrder || !playersData) return;
-        const turnPlayerId = gameData.turnOrder[gameData.currentPlayerIndex];
-        const player = playersData[turnPlayerId];
         
         if (gameData.currentRoll.isRolling) {
             const rollerName = playersData[gameData.currentRoll.rollerId]?.name || '';
             gameInfoEl.textContent = `Losowanie kostki gracza: ${rollerName}. Możesz wpłynąć na wynik!`;
             gameInfoEl.className = "alert alert-warning text-center fw-bold";
         } else {
-            const turnMessage = player ? `Tura gracza: ${player.name}. Wybierz i zatwierdź swój zakład.` : 'Czekam na gracza...';
-            if (gameData.lastResultMessage) {
-                gameInfoEl.innerHTML = `<div>${turnMessage}</div><hr class="my-2"><p class="text-muted mb-0"><small>${gameData.lastResultMessage}</small></p>`;
-            } else {
-                gameInfoEl.textContent = turnMessage;
-            }
-            gameInfoEl.className = "alert alert-info text-center";
+            gameInfoEl.innerHTML = renderRoundSummary(gameData.rollHistory);
+            gameInfoEl.className = "alert alert-light text-center"; // Changed to alert-light
         }
     }
 
