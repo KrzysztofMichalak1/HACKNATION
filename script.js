@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const thresholds = Array.from({length: 8}, (_, i) => 400 - i * 50); // [400, 350, ..., 50]
 
             for (const threshold of thresholds) {
-                if (newBudget < threshold && oldBudget >= threshold && !usedThresholds.includes(threshold)) {
+                if (newBudget <= threshold && oldBudget > threshold && !usedThresholds.includes(threshold)) {
                     const success = Math.random() < 0.5;
                     bailoutAttempt = { threshold, success };
                     if (success) {
