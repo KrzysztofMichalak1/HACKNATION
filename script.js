@@ -441,8 +441,8 @@ document.addEventListener('DOMContentLoaded', () => {
             trueValueText.innerHTML = `Ostateczny wynik: <span class="text-lotto-yellow-strong fw-bold">${roll.finalValue}</span>`;
             
             if (roll.turnSummary && roundSummaryEl) {
-                const prizeColor = roll.turnSummary.prize.value >= 0 ? 'text-success' : 'text-danger';
-                const totalColor = roll.turnSummary.total.value >= 0 ? 'text-success' : 'text-danger';
+                const prizeColor = roll.turnSummary.prize.value >= 0 ? 'text-strong-success' : 'text-strong-danger';
+                const totalColor = roll.turnSummary.total.value >= 0 ? 'text-strong-success' : 'text-strong-danger';
 
                 roundSummaryEl.innerHTML = `
                     <p class="mb-0 ${prizeColor}"><small>${roll.turnSummary.prize.text}</small></p>

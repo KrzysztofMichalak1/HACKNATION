@@ -279,3 +279,13 @@ body {
     color: #ffd700 !important; /* A brighter gold color */
     text-shadow: 0 0 5px rgba(255, 215, 0, 0.7), 0 0 10px rgba(255, 215, 0, 0.5);
 }
+
+.text-strong-success {
+    color: #28a745 !important; /* Bootstrap success color */
+    text-shadow: 0 0 5px rgba(40, 167, 69, 0.7), 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+.text-strong-danger {
+    color: #dc3545 !important; /* Bootstrap danger color */
+    text-shadow: 0 0 5px rgba(220, 53, 69, 0.7), 0 0 10px rgba(220, 53, 69, 0.5);
+}
