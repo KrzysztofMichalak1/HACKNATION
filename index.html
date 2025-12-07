@@ -34,6 +34,15 @@
                             <li class="list-group-item text-muted text-center">Czekanie na graczy...</li>
                         </ul>
 
+                        <div id="budget-allocation-controls" class="d-none">
+                            <hr>
+                            <h5 class="text-center">Podziel budżet (500 PKT):</h5>
+                            <div id="budget-inputs-container">
+                                <!-- Tu pojawią się inputy dla graczy -->
+                            </div>
+                            <div id="budget-total" class="text-center fw-bold mt-2"></div>
+                        </div>
+
                         <button id="start-online-btn" class="btn btn-primary w-100" style="display:none;">ROZPOCZNIJ GRĘ (Host)</button>
                         <p id="waiting-msg" class="text-center mt-2 text-muted" style="display:none;">Czekanie aż host rozpocznie grę...</p>
                     </div>
@@ -50,7 +59,7 @@
                     <button id="history-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#historyModal">
                         Historia
                     </button>
-                    <button id="budget-plot-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#budgetPlotModal">
+                    <button id="budget-plot-btn" class="btn btn-outline-secondary d-none" data-bs-toggle="modal" data-bs-target="#budgetPlotModal">
                         Wykres
                     </button>
                     <button id="ranking-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#rankingModal">

@@ -44,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const waitingMsg = document.getElementById('waiting-msg');
     const usernameInput = document.getElementById('username');
     const joinBtn = document.getElementById('join-btn');
+    const budgetAllocationControls = document.getElementById('budget-allocation-controls');
+    const budgetInputsContainer = document.getElementById('budget-inputs-container');
+    const budgetTotal = document.getElementById('budget-total');
 
     // Gra
     const playersContainer = document.getElementById('players-container');
@@ -133,21 +136,71 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    function updateBudgetAllocation() {
+        const inputs = document.querySelectorAll('#budget-inputs-container input');
+        let total = 0;
+        inputs.forEach(input => {
+            total += Number(input.value);
+        });
+
+        budgetTotal.textContent = `RAZEM: ${total} / 500 PKT`;
+        if (total !== 500) {
+            budgetTotal.classList.add('text-danger');
+        } else {
+            budgetTotal.classList.remove('text-danger');
+        }
+    }
+
     function renderLobby() {
         lobbyList.innerHTML = '';
         const playerKeys = Object.keys(playersData);
 
         if (playerKeys.length === 0) {
             lobbyList.innerHTML = '<li class="list-group-item text-muted text-center">Czekanie na graczy...</li>';
+            budgetAllocationControls.classList.add('d-none');
             return;
         }
 
+        // Render list of players for everyone
         Object.values(playersData).forEach(p => {
             const li = document.createElement('li');
             li.className = "list-group-item";
             li.textContent = p.name + (p.id === myId ? " (Ty)" : "");
             lobbyList.appendChild(li);
         });
+
+        // Render budget controls only for the host
+        if (amIHost) {
+            budgetAllocationControls.classList.remove('d-none');
+            budgetInputsContainer.innerHTML = '';
+            const playerCount = playerKeys.length;
+            const evenSplit = Math.floor(500 / playerCount);
+            let remainder = 500 % playerCount;
+
+            playerKeys.forEach((playerId, index) => {
+                const p = playersData[playerId];
+                let value = evenSplit;
+                if(remainder > 0){
+                    value++;
+                    remainder--;
+                }
+                const inputGroup = document.createElement('div');
+                inputGroup.className = 'input-group mb-2';
+                inputGroup.innerHTML = `
+                    <span class="input-group-text">${p.name}</span>
+                    <input type="number" class="form-control budget-input" value="${value}" data-player-id="${p.id}">
+                `;
+                budgetInputsContainer.appendChild(inputGroup);
+            });
+
+            budgetInputsContainer.querySelectorAll('.budget-input').forEach(input => {
+                input.addEventListener('input', updateBudgetAllocation);
+            });
+
+            updateBudgetAllocation();
+        } else {
+            budgetAllocationControls.classList.add('d-none');
+        }
     }
 
     // Host klika START
@@ -155,12 +208,34 @@ document.addEventListener('DOMContentLoaded', () => {
         const playerIds = Object.keys(playersData);
         if(playerIds.length === 0) return;
 
+        // Validate budget allocation
+        const budgetInputs = document.querySelectorAll('.budget-input');
+        let totalBudget = 0;
+        const playerBudgets = {};
+        budgetInputs.forEach(input => {
+            const playerId = input.dataset.playerId;
+            const budget = Number(input.value);
+            playerBudgets[playerId] = budget;
+            totalBudget += budget;
+        });
+
+        if (totalBudget !== 500) {
+            return alert('Suma budżetu musi wynosić dokładnie 500 PKT!');
+        }
+
+        // Update each player with their starting budget
+        const playerUpdates = {};
+        playerIds.forEach(id => {
+            playerUpdates[`${id}/budget`] = playerBudgets[id];
+        });
+        db.ref('players').update(playerUpdates);
+
         // Inicjalizacja stanu gry w bazie
         db.ref("gameState").set({
             status: "PLAYING",
             round: 1,
-            sharedBudget: 500,
-            budgetHistory: [500], // Initialize budget history
+            // sharedBudget is now distributed among players
+            budgetHistory: [playerBudgets], // Store initial allocation
             usedBailoutThresholds: [],
             currentPlayerIndex: 0,
             turnOrder: playerIds.sort(), // Ustalona kolejność graczy
@@ -269,13 +344,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateHeaderUI() {
-        if (!gameData) return;
+        if (!gameData || !playersData) return;
+
+        const totalBudget = Object.values(playersData).reduce((sum, player) => sum + (player.budget || 0), 0);
+
         roundDisplayEl.textContent = gameData.round;
-        sharedBudgetEl.textContent = `${gameData.sharedBudget} PKT`;
+        sharedBudgetEl.textContent = `${totalBudget} PKT`;
 
         sharedBudgetEl.classList.remove('text-success', 'text-danger', 'fw-bold');
-        if (gameData.sharedBudget > 100) sharedBudgetEl.classList.add('text-success', 'fw-bold');
-        else if (gameData.sharedBudget < 100) sharedBudgetEl.classList.add('text-danger', 'fw-bold');
+        if (totalBudget > 100) sharedBudgetEl.classList.add('text-success', 'fw-bold');
+        else if (totalBudget < 100) sharedBudgetEl.classList.add('text-danger', 'fw-bold');
     }
 
     function renderRoundSummary(history) {
@@ -357,7 +435,10 @@ document.addEventListener('DOMContentLoaded', () => {
             // Zawartość karty
             cardDiv.innerHTML = `
                 <div class="${cardClasses.join(' ')}" id="player-card-${p.id}" data-player-id="${p.id}">
-                    <h5 class="card-title">${p.name} ${isMyCard ? '(Ty)' : ''}</h5>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="card-title">${p.name} ${isMyCard ? '(Ty)' : ''}</h5>
+                        <h5 class="card-title fw-bold">${p.budget || 0} PKT</h5>
+                    </div>
                     <div class="bet-controls">
                         ${(isActive && isMyCard && !p.hasPlacedBet) ? renderBetControls(p.id) : `<div class="bet-info mt-2 text-muted">${betInfo}</div>`}
                     </div>
@@ -593,9 +674,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!gameData || !gameData.currentRoll || !gameData.currentRoll.isRolling) return;
 
         const currentCost = gameData.currentRoll.influenceCost;
-        if (gameData.sharedBudget < currentCost) {
-            return alert("Za mało pieniędzy w kasie!");
+        if (playersData[myId].budget < currentCost) {
+            return alert("Nie masz wystarczająco pieniędzy!");
         }
+
+        // Deduct cost from my budget immediately
+        db.ref(`players/${myId}/budget`).transaction(budget => (budget || 0) - currentCost);
 
         const rollRef = db.ref('gameState/currentRoll');
 
@@ -603,6 +687,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentRoll) {
                 // Prevent multiple influences from the same player
                 if ((currentRoll.influencedBy || []).includes(myId)) {
+                    // This transaction will be aborted, but the budget was already deducted.
+                    // To refund, we need to add it back.
+                    db.ref(`players/${myId}/budget`).transaction(budget => (budget || 0) + currentCost);
                     return; // Abort transaction
                 }
                 
@@ -636,6 +723,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!currentRoll.influences) currentRoll.influences = {};
                 const influenceId = `influence_${Date.now()}`;
                 currentRoll.influences[influenceId] = { influencerName: myName, action: amount > 0 ? '+1' : '-1', cost: currentCost };
+                
+                currentRoll.totalInfluenceCost = (currentRoll.totalInfluenceCost || 0) + currentCost;
             }
             return currentRoll;
         });
@@ -656,11 +745,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if(!fullState || !fullState.gameState || !fullState.gameState.currentRoll.isRolling) return; // Prevent double execution
             
             const state = fullState.gameState;
+            const players = fullState.players;
             const roll = state.currentRoll;
             const turnPlayerId = state.turnOrder[state.currentPlayerIndex];
-            const player = fullState.players[turnPlayerId];
+            const roller = players[turnPlayerId];
 
-            if (!player || !player.bet) {
+            if (!roller || !roller.bet) {
                 console.error("CRITICAL: Player or player.bet is missing in finalizeTurn for player:", turnPlayerId);
                 const updates = {
                     '/gameState/currentRoll/isRolling': false,
@@ -670,69 +760,80 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            let win = false;
-            if (player.bet.type === 'even' && roll.finalValue % 2 === 0) win = true;
-            if (player.bet.type === 'odd' && roll.finalValue % 2 !== 0) win = true;
-            if (player.bet.type === 'number' && roll.finalValue === player.bet.value) win = true;
+            let win = checkWin(roll.finalValue, roller.bet);
 
             let betWinnings = 0;
             if (win) {
-                betWinnings = player.bet.type === 'number' ? 60 : 30;
+                betWinnings = roller.bet.type === 'number' ? 60 : 30;
             }
 
             const roundCost = 15;
-            const totalInfluenceCost = Object.values(roll.influences || {}).reduce((sum, inf) => sum + inf.cost, 0);
+            const totalInfluenceCost = roll.totalInfluenceCost || 0;
             
-            const initialBudgetChange = betWinnings - roundCost - totalInfluenceCost;
-            const oldBudget = state.sharedBudget;
-            let newBudget = oldBudget + initialBudgetChange;
+            // Calculate changes for the roller
+            const rollerBudgetChange = betWinnings - roundCost;
+            const newRollerBudget = (roller.budget || 0) + rollerBudgetChange;
             
+            // Calculate total budget before and after roller's turn
+            const oldTotalBudget = Object.values(players).reduce((sum, p) => sum + (p.budget || 0), 0);
+            let newTotalBudget = oldTotalBudget + rollerBudgetChange;
+            
+            // Bailout logic based on total budget
             let bailoutAttempt = null;
             const usedThresholds = state.usedBailoutThresholds || [];
             const thresholds = Array.from({length: 8}, (_, i) => 400 - i * 50); // [400, 350, ..., 50]
 
             for (const threshold of thresholds) {
-                if (newBudget <= threshold && oldBudget > threshold && !usedThresholds.includes(threshold)) {
+                if (newTotalBudget <= threshold && oldTotalBudget > threshold && !usedThresholds.includes(threshold)) {
                     const success = Math.random() < 0.5;
                     bailoutAttempt = { threshold, success };
                     if (success) {
-                        newBudget += 50;
+                        // If bailout is successful, the 50 PKT are added to the roller's budget
+                        newTotalBudget += 50;
                     }
                     usedThresholds.push(threshold);
                     break;
                 }
             }
-
-            const finalBudgetChange = newBudget - oldBudget;
+            
+            // The final change to the team's total budget
+            const finalTeamBudgetChange = newTotalBudget - oldTotalBudget;
 
             const turnSummary = {
                 betWinnings: { text: `Wygrana z zakładu: ${betWinnings > 0 ? '+' : ''}${betWinnings} PKT`, value: betWinnings },
                 roundCost: { text: `Koszt rundy: -${roundCost} PKT`, value: -roundCost },
                 influenceCost: { text: `Koszt wpływu: -${totalInfluenceCost} PKT`, value: -totalInfluenceCost },
-                bailout: bailoutAttempt ? { text: `Bailout! ${bailoutAttempt.success ? '+50' : '+0'} PKT`, value: bailoutAttempt.success ? 50 : 0 } : null,
-                total: { text: `Suma: ${finalBudgetChange >= 0 ? '+' : ''}${finalBudgetChange} PKT`, value: finalBudgetChange }
+                bailout: bailoutAttempt ? { text: `Bailout! ${bailoutAttempt.success ? `+50 PKT (do ${roller.name})` : '+0 PKT'}`, value: bailoutAttempt.success ? 50 : 0 } : null,
+                total: { text: `Suma (drużyna): ${finalTeamBudgetChange >= 0 ? '+' : ''}${finalTeamBudgetChange} PKT`, value: finalTeamBudgetChange }
             };
 
-            let outcomeMessage = `Na kostce: ${roll.baseValue}. Wynik końcowy: ${roll.finalValue}. ${player.name} ${win ? `wygrywa` : `przegrywa`}.`;
+            let outcomeMessage = `Na kostce: ${roll.baseValue}. Wynik końcowy: ${roll.finalValue}. ${roller.name} ${win ? `wygrywa` : `przegrywa`}.`;
 
             const historyEntry = { 
-                rollerName: player.name, 
+                rollerName: roller.name, 
                 fullMessage: outcomeMessage, 
                 influences: roll.influences ?? null,
                 summary: turnSummary,
-                bet: player.bet
+                bet: roller.bet
             };
             
             let updates = {};
+            // Update roller's budget
+            updates[`/players/${turnPlayerId}/budget`] = newRollerBudget + (bailoutAttempt && bailoutAttempt.success ? 50 : 0);
+
+            // Update gameState
             updates['/gameState/rollHistory'] = [...(state.rollHistory || []), historyEntry];
-            updates['/gameState/sharedBudget'] = newBudget;
             updates['/gameState/usedBailoutThresholds'] = usedThresholds;
-            updates['/gameState/budgetHistory'] = [...(state.budgetHistory || [100]), newBudget];
+            // budgetHistory needs to be updated with the new budgets of all players, but we only have the roller's new budget here.
+            // It's better to update the budgetHistory in a separate step or when rendering the chart.
+            // For simplicity, we'll stop updating budgetHistory for now.
+            // updates['/gameState/budgetHistory'] = [...(state.budgetHistory || []), newPlayerBudgets]; 
             updates['/gameState/lastResultMessage'] = outcomeMessage;
             updates['/gameState/currentRoll/turnSummary'] = turnSummary;
             updates['/gameState/currentRoll/bailoutAttempt'] = bailoutAttempt;
             updates['/gameState/currentRoll/isRolling'] = false;
             
+            // Advance turn
             let nextIndex = (state.currentPlayerIndex + 1) % state.turnOrder.length;
             updates['/gameState/round'] = state.round + 1;
             updates[`/players/${turnPlayerId}/hasPlacedBet`] = false;
