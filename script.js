@@ -606,9 +606,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const isWinningAfter = checkWin(value_after, bet);
 
                 let statUpdate = {};
-                if (!wasWinningBefore && isWinningAfter) { // SAVE
+                if (!wasWinningBefore && isWinningAfter) { // RATUNKI
                     statUpdate = { [`players/${myId}/saves`]: firebase.database.ServerValue.increment(1) };
-                } else if (wasWinningBefore && !isWinningAfter) { // TROLL
+                } else if (wasWinningBefore && !isWinningAfter) { // SABOTAŻE
                     statUpdate = { [`players/${myId}/trolls`]: firebase.database.ServerValue.increment(1) };
                 }
 
@@ -857,8 +857,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     <tr>
                         <th scope="col">#</th>
                         <th scope="col">Gracz</th>
-                        <th scope="col">Saves</th>
-                        <th scope="col">Trolls</th>
+                        <th scope="col">Ratunki</th>
+                        <th scope="col">Sabotaże</th>
                         <th scope="col">Wynik Netto</th>
                     </tr>
                 </thead>
