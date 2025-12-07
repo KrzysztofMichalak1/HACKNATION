@@ -445,9 +445,9 @@ document.addEventListener('DOMContentLoaded', () => {
         let betText = '';
         if (roll.bet) {
             if (roll.bet.type === 'number') {
-                betText = `Zakład gracza: ${currentPlayer?.name} postawił na ${roll.bet.value}`;
+                betText = `Zakład gracza: ${currentPlayer?.name} postawił na: ${roll.bet.value}`;
             } else {
-                betText = `Zakład gracza: ${currentPlayer?.name} postawił na ${roll.bet.type === 'even' ? 'Parzyste' : 'Nieparzyste'}`;
+                betText = `Zakład gracza: ${currentPlayer?.name} postawił na: ${roll.bet.type === 'even' ? 'Parzyste' : 'Nieparzyste'}`;
             }
         }
         currentBetDisplay.textContent = betText;

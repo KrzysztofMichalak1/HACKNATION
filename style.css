@@ -276,7 +276,7 @@ body {
     transform-origin: top left;
 }
 .text-lotto-yellow-strong {
-    color: #ffd700 !important; /* A brighter gold color */
+    color: ffd700 !important; /* A brighter gold color */
     text-shadow: 0 0 5px rgba(255, 215, 0, 0.7), 0 0 10px rgba(255, 215, 0, 0.5);
 }
 
@@ -305,4 +305,9 @@ body {
     font-size: 1.5rem;
     font-weight: bold;
     border: 2px solid white;
+}
+
+#influence-controls .btn {
+    padding: 0.75rem 1.5rem; /* Increase padding */
+    font-size: 1.35rem; /* Slightly increase font size */
 }
