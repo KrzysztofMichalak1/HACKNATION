@@ -638,20 +638,15 @@ document.addEventListener('DOMContentLoaded', () => {
             updates['/gameState/lastResultMessage'] = outcomeMessage;
             updates['/gameState/currentRoll/turnSummary'] = turnSummary;
             
-            // Move to next player or round
-            let nextIndex = state.currentPlayerIndex + 1;
-            if (nextIndex >= state.turnOrder.length) {
-                updates['/gameState/round'] = state.round + 1;
-                // Reset all players for the new round
-                state.turnOrder.forEach(pid => {
-                    updates[`/players/${pid}/hasPlacedBet`] = false;
-                    updates[`/players/${pid}/bet`] = null;
-                });
-                nextIndex = 0;
-            } else {
-                 updates[`/players/${turnPlayerId}/hasPlacedBet`] = false;
-                 updates[`/players/${turnPlayerId}/bet`] = null;
-            }
+            // Move to next player and increment round
+            let nextIndex = (state.currentPlayerIndex + 1) % state.turnOrder.length;
+
+            updates['/gameState/round'] = state.round + 1;
+            
+            // Reset the player who just played
+            updates[`/players/${turnPlayerId}/hasPlacedBet`] = false;
+            updates[`/players/${turnPlayerId}/bet`] = null;
+
             updates['/gameState/currentPlayerIndex'] = nextIndex;
 
             db.ref().update(updates);
