@@ -156,6 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             round: 1,
             sharedBudget: 100,
             budgetHistory: [100], // Initialize budget history
+            usedBailoutThresholds: [],
             currentPlayerIndex: 0,
             turnOrder: playerIds.sort(), // Ustalona kolejność graczy
             lastResultMessage: '',
@@ -189,16 +190,54 @@ document.addEventListener('DOMContentLoaded', () => {
         initGameListeners();
     }
 
+    const bailoutPanel = document.getElementById('bailout-panel');
+    const bailoutCoin = document.getElementById('bailout-coin');
+    const bailoutResultText = document.getElementById('bailout-result-text');
+    let lastProcessedBailout = null;
+
+    function startBailoutAnimation(bailoutData, onComplete) {
+        bailoutPanel.classList.remove('d-none');
+        bailoutCoin.classList.add('bailout-coin-spinning');
+        bailoutResultText.textContent = '';
+        
+        setTimeout(() => {
+            bailoutCoin.classList.remove('bailout-coin-spinning');
+            if(bailoutData.success) {
+                bailoutResultText.textContent = 'Success! +50 PKT!';
+                bailoutResultText.className = 'mt-4 text-success fw-bold';
+            } else {
+                bailoutResultText.textContent = 'No Luck This Time.';
+                bailoutResultText.className = 'mt-4 text-danger fw-bold';
+            }
+
+            setTimeout(() => {
+                bailoutPanel.classList.add('d-none');
+                onComplete();
+            }, 2000);
+
+        }, 3000);
+    }
+
     function initGameListeners() {
         // Główny listener stanu gry
         db.ref("gameState").on("value", (snapshot) => {
             gameData = snapshot.val();
             if (!gameData) return; // Jeśli gra została zresetowana
             
-            updateHeaderUI();
-            updateGameInfo();
-            handleRollUpdate(gameData.currentRoll);
-            renderPlayerCards(); // Re-render cards on game state change for robustness
+            const newBailout = gameData.currentRoll.bailoutAttempt;
+            if (newBailout && JSON.stringify(newBailout) !== lastProcessedBailout) {
+                lastProcessedBailout = JSON.stringify(newBailout);
+                
+                startBailoutAnimation(newBailout, () => {
+                    updateHeaderUI();
+                    handleRollUpdate(gameData.currentRoll);
+                    renderPlayerCards();
+                });
+            } else {
+                updateHeaderUI();
+                handleRollUpdate(gameData.currentRoll);
+                renderPlayerCards();
+            }
         });
 
         // Listener zmian u graczy
@@ -482,15 +521,19 @@ document.addEventListener('DOMContentLoaded', () => {
             trueValueText.innerHTML = `Ostateczny wynik: <span class="text-lotto-yellow-strong fw-bold">${roll.finalValue}</span>`;
             
             if (roll.turnSummary && roundSummaryEl) {
-                const betWinningsColor = roll.turnSummary.betWinnings.value >= 0 ? 'text-strong-success' : 'text-strong-danger';
                 const totalColor = roll.turnSummary.total.value >= 0 ? 'text-strong-success' : 'text-strong-danger';
 
-                roundSummaryEl.innerHTML = `
-                    <p class="mb-0 ${betWinningsColor}"><small>${roll.turnSummary.betWinnings.text}</small></p>
+                let summaryHTML = `
+                    <p class="mb-0 ${roll.turnSummary.betWinnings.value > 0 ? 'text-strong-success' : 'text-strong-danger'}"><small>${roll.turnSummary.betWinnings.text}</small></p>
                     <p class="mb-0 text-secondary"><small>${roll.turnSummary.roundCost.text}</small></p>
                     <p class="mb-0 text-warning"><small>${roll.turnSummary.influenceCost.text}</small></p>
-                    <p class="fw-bold fs-1 ${totalColor}">${roll.turnSummary.total.text}</p>
                 `;
+                if(roll.turnSummary.bailout) {
+                    summaryHTML += `<p class="mb-0 ${roll.turnSummary.bailout.value > 0 ? 'text-success' : 'text-danger'} fw-bold"><small>${roll.turnSummary.bailout.text}</small></p>`;
+                }
+                summaryHTML += `<p class="fw-bold fs-1 ${totalColor}">${roll.turnSummary.total.text}</p>`;
+
+                roundSummaryEl.innerHTML = summaryHTML;
             }
         }
         
@@ -568,10 +611,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const turnPlayerId = state.turnOrder[state.currentPlayerIndex];
             const player = fullState.players[turnPlayerId];
 
-            // Safeguard against missing player/bet data
             if (!player || !player.bet) {
                 console.error("CRITICAL: Player or player.bet is missing in finalizeTurn for player:", turnPlayerId);
-                // Just advance the turn without scoring to prevent getting stuck
                 const updates = {
                     '/gameState/currentRoll/isRolling': false,
                     '/gameState/currentPlayerIndex': (state.currentPlayerIndex + 1) % state.turnOrder.length
@@ -580,7 +621,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             
-            // Calculate result
             let win = false;
             if (player.bet.type === 'even' && roll.finalValue % 2 === 0) win = true;
             if (player.bet.type === 'odd' && roll.finalValue % 2 !== 0) win = true;
@@ -588,44 +628,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
             let betWinnings = 0;
             if (win) {
-                if (player.bet.type === 'number') {
-                    betWinnings = 60;
-                } else { // even or odd
-                    betWinnings = 30;
+                betWinnings = player.bet.type === 'number' ? 60 : 30;
+            }
+
+            const roundCost = 15;
+            const totalInfluenceCost = Object.values(roll.influences || {}).reduce((sum, inf) => sum + inf.cost, 0);
+            
+            const initialBudgetChange = betWinnings - roundCost - totalInfluenceCost;
+            const oldBudget = state.sharedBudget;
+            let newBudget = oldBudget + initialBudgetChange;
+            
+            let bailoutAttempt = null;
+            const usedThresholds = state.usedBailoutThresholds || [];
+            const thresholds = Array.from({length: 10}, (_, i) => -100 - i * 50); // [-100, -150, ..., -550]
+
+            for (const threshold of thresholds) {
+                if (newBudget <= threshold && oldBudget > threshold && !usedThresholds.includes(threshold)) {
+                    const success = Math.random() < 0.5;
+                    bailoutAttempt = { threshold, success };
+                    if (success) {
+                        newBudget += 50;
+                    }
+                    usedThresholds.push(threshold);
+                    break;
                 }
             }
 
-            const roundCost = 15; // 1 round costs 15
-
-            let totalInfluenceCost = 0;
-            if(roll.influences) {
-                totalInfluenceCost = Object.values(roll.influences).reduce((sum, inf) => sum + inf.cost, 0);
-            }
-            
-            const budgetChange = betWinnings - roundCost - totalInfluenceCost;
+            const finalBudgetChange = newBudget - oldBudget;
 
             const turnSummary = {
-                betWinnings: {
-                    text: `Wygrana z zakładu: ${betWinnings > 0 ? '+' : ''}${betWinnings} PKT`,
-                    value: betWinnings
-                },
-                roundCost: {
-                    text: `Koszt rundy: -${roundCost} PKT`,
-                    value: -roundCost
-                },
-                influenceCost: {
-                    text: `Koszt wpływu: -${totalInfluenceCost} PKT`,
-                    value: -totalInfluenceCost
-                },
-                total: {
-                    text: `Suma: ${budgetChange > 0 ? '+' : ''}${budgetChange} PKT`,
-                    value: budgetChange
-                }
+                betWinnings: { text: `Wygrana z zakładu: ${betWinnings > 0 ? '+' : ''}${betWinnings} PKT`, value: betWinnings },
+                roundCost: { text: `Koszt rundy: -${roundCost} PKT`, value: -roundCost },
+                influenceCost: { text: `Koszt wpływu: -${totalInfluenceCost} PKT`, value: -totalInfluenceCost },
+                bailout: bailoutAttempt ? { text: `Bailout! ${bailoutAttempt.success ? '+50' : '+0'} PKT`, value: bailoutAttempt.success ? 50 : 0 } : null,
+                total: { text: `Suma: ${finalBudgetChange >= 0 ? '+' : ''}${finalBudgetChange} PKT`, value: finalBudgetChange }
             };
 
             let outcomeMessage = `Na kostce: ${roll.baseValue}. Wynik końcowy: ${roll.finalValue}. ${player.name} ${win ? `wygrywa` : `przegrywa`}.`;
-            
-            // Save to history
+
             const historyEntry = { 
                 rollerName: player.name, 
                 fullMessage: outcomeMessage, 
@@ -633,34 +673,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 summary: turnSummary,
                 bet: player.bet
             };
-            db.ref('gameState/rollHistory').transaction(history => {
-                history = history || [];
-                history.push(historyEntry);
-                return history;
-            });
             
-            // Prepare database updates
             let updates = {};
-            const newBudget = state.sharedBudget + budgetChange;
+            updates['/gameState/rollHistory'] = [...(state.rollHistory || []), historyEntry];
             updates['/gameState/sharedBudget'] = newBudget;
-
-            const budgetHistory = state.budgetHistory || [100];
-            budgetHistory.push(newBudget);
-            updates['/gameState/budgetHistory'] = budgetHistory;
-            
-            updates['/gameState/currentRoll/isRolling'] = false;
+            updates['/gameState/usedBailoutThresholds'] = usedThresholds;
+            updates['/gameState/budgetHistory'] = [...(state.budgetHistory || [100]), newBudget];
             updates['/gameState/lastResultMessage'] = outcomeMessage;
             updates['/gameState/currentRoll/turnSummary'] = turnSummary;
+            updates['/gameState/currentRoll/bailoutAttempt'] = bailoutAttempt;
+            updates['/gameState/currentRoll/isRolling'] = false;
             
-            // Move to next player and increment round
             let nextIndex = (state.currentPlayerIndex + 1) % state.turnOrder.length;
-
             updates['/gameState/round'] = state.round + 1;
-            
-            // Reset the player who just played
             updates[`/players/${turnPlayerId}/hasPlacedBet`] = false;
             updates[`/players/${turnPlayerId}/bet`] = null;
-
             updates['/gameState/currentPlayerIndex'] = nextIndex;
 
             db.ref().update(updates);
@@ -718,6 +745,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="mb-0"><small>${entry.summary.betWinnings.text}</small></p>
                     <p class="mb-0"><small>${entry.summary.roundCost.text}</small></p>
                     <p class="mb-0"><small>${entry.summary.influenceCost.text}</small></p>
+                    ${entry.summary.bailout ? `<p class="mb-0 fw-bold"><small>${entry.summary.bailout.text}</small></p>` : ''}
                     <p class="fw-bold mb-0"><small>${entry.summary.total.text}</small></p>
                 </div>
             `;

@@ -311,3 +311,52 @@ body {
     padding: 0.75rem 1.5rem; /* Increase padding */
     font-size: 1.35rem; /* Slightly increase font size */
 }
+
+/* --- Bailout Panel --- */
+.bailout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1060; /* Higher than Bootstrap modal backdrop */
+}
+
+.bailout-content {
+    color: white;
+    padding: 40px;
+    background-color: var(--lotto-blue);
+    border: 5px solid var(--lotto-yellow);
+    border-radius: 1rem;
+}
+
+#bailout-animation-container {
+    perspective: 1000px;
+}
+
+#bailout-coin {
+    width: 150px;
+    height: 150px;
+    line-height: 150px;
+    border-radius: 50%;
+    background-color: var(--lotto-yellow);
+    color: var(--lotto-blue);
+    font-size: 5rem;
+    font-weight: bold;
+    margin: 20px auto;
+    transition: transform 0.8s;
+    transform-style: preserve-3d;
+}
+
+.bailout-coin-spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotateY(0deg); }
+    to { transform: rotateY(360deg); }
+}
