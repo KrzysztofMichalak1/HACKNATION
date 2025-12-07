@@ -161,7 +161,7 @@ body {
 #dice-info-section {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center; /* Align text to the left */
     flex: 1; /* Allow left section to grow and take available space */
     padding-right: 1rem; /* Add some spacing between sections */
