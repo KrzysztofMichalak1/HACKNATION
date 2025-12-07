@@ -52,6 +52,9 @@
                     <button id="budget-plot-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#budgetPlotModal">
                         Wykres
                     </button>
+                    <button id="ranking-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#rankingModal">
+                        Ranking
+                    </button>
                     <div class="text-end">
                         <h4>WSPÓLNA KASA</h4>
                         <h3 id="shared-budget" class="mb-0">500 PKT</h3>
@@ -153,6 +156,24 @@
                 </div>
                 <div class="modal-body">
                     <canvas id="budget-chart"></canvas>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Rankingu -->
+    <div class="modal fade" id="rankingModal" tabindex="-1" aria-labelledby="rankingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rankingModalLabel">Ranking Graczy (Saves / Trolls)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="ranking-body">
+                    <!-- Ranking zostanie wygenerowany przez JS -->
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>

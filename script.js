@@ -77,7 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
             id: myId,
             name: myName,
             bet: null,
-            hasPlacedBet: false
+            hasPlacedBet: false,
+            saves: 0,
+            trolls: 0
         });
 
         // Ukrywamy przycisk dołączenia i input
@@ -568,29 +570,63 @@ document.addEventListener('DOMContentLoaded', () => {
         }, rollDuration);
     }
 
+    function checkWin(value, bet) {
+        if (!bet) return false;
+        if (bet.type === 'even' && value % 2 === 0) return true;
+        if (bet.type === 'odd' && value % 2 !== 0) return true;
+        if (bet.type === 'number' && value === bet.value) return true;
+        return false;
+    }
+
     function sendInfluence(amount) {
+        if (!gameData || !gameData.currentRoll || !gameData.currentRoll.isRolling) return;
+
         const currentCost = gameData.currentRoll.influenceCost;
         if (gameData.sharedBudget < currentCost) {
             return alert("Za mało pieniędzy w kasie!");
         }
 
-        // Mark that this player has influenced the roll
-        db.ref(`gameState/currentRoll/influencedBy`).transaction(list => {
-            list = list || [];
-            list.push(myId);
-            return list;
-        });
-        
-        // Add the influence action to the list for display
-        const influenceData = { influencerName: myName, action: amount > 0 ? '+1' : '-1', cost: currentCost };
-        db.ref('gameState/currentRoll/influences').push(influenceData);
+        const rollRef = db.ref('gameState/currentRoll');
 
-        // Modify the dice value
-        db.ref(`gameState/currentRoll/finalValue`).transaction(val => {
-            let newVal = (val || 1) + amount;
-            if (newVal > 6) return 1;
-            if (newVal < 1) return 6;
-            return newVal;
+        rollRef.transaction(currentRoll => {
+            if (currentRoll) {
+                // Prevent multiple influences from the same player
+                if ((currentRoll.influencedBy || []).includes(myId)) {
+                    return; // Abort transaction
+                }
+                
+                const bet = currentRoll.bet;
+                const value_before = currentRoll.finalValue;
+                
+                let value_after = value_before + amount;
+                if (value_after > 6) value_after = 1;
+                if (value_after < 1) value_after = 6;
+
+                const wasWinningBefore = checkWin(value_before, bet);
+                const isWinningAfter = checkWin(value_after, bet);
+
+                let statUpdate = {};
+                if (!wasWinningBefore && isWinningAfter) { // SAVE
+                    statUpdate = { [`players/${myId}/saves`]: firebase.database.ServerValue.increment(1) };
+                } else if (wasWinningBefore && !isWinningAfter) { // TROLL
+                    statUpdate = { [`players/${myId}/trolls`]: firebase.database.ServerValue.increment(1) };
+                }
+
+                // Update player stats
+                if(Object.keys(statUpdate).length > 0) {
+                    db.ref().update(statUpdate);
+                }
+
+                // Update roll state
+                currentRoll.finalValue = value_after;
+                if (!currentRoll.influencedBy) currentRoll.influencedBy = [];
+                currentRoll.influencedBy.push(myId);
+
+                if (!currentRoll.influences) currentRoll.influences = {};
+                const influenceId = `influence_${Date.now()}`;
+                currentRoll.influences[influenceId] = { influencerName: myName, action: amount > 0 ? '+1' : '-1', cost: currentCost };
+            }
+            return currentRoll;
         });
     }
 
@@ -796,5 +832,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const budgetPlotModal = document.getElementById('budgetPlotModal');
     if (budgetPlotModal) {
         budgetPlotModal.addEventListener('show.bs.modal', renderBudgetPlot);
+    }
+
+    // ======================================================
+    // 11. RANKING
+    // ======================================================
+    const rankingModal = document.getElementById('rankingModal');
+    const rankingBody = document.getElementById('ranking-body');
+
+    function renderRanking() {
+        if (!playersData) return;
+
+        const playersArray = Object.values(playersData);
+        
+        // Calculate net score and sort
+        playersArray.forEach(p => {
+            p.netScore = (p.saves || 0) - (p.trolls || 0);
+        });
+        playersArray.sort((a, b) => b.netScore - a.netScore);
+
+        let tableHTML = `
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Gracz</th>
+                        <th scope="col">Saves</th>
+                        <th scope="col">Trolls</th>
+                        <th scope="col">Wynik Netto</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        playersArray.forEach((p, index) => {
+            tableHTML += `
+                <tr>
+                    <th scope="row">${index + 1}</th>
+                    <td>${p.name}</td>
+                    <td>${p.saves || 0}</td>
+                    <td>${p.trolls || 0}</td>
+                    <td>${p.netScore}</td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `
+                </tbody>
+            </table>
+        `;
+
+        rankingBody.innerHTML = tableHTML;
+    }
+
+    if(rankingModal) {
+        rankingModal.addEventListener('show.bs.modal', renderRanking);
     }
 });
