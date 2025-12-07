@@ -136,7 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 gameData = newGameData; // Zapisz nowe dane gry
                 startGameUI();
             }
-            // Jeśli gra się resetuje lub kończy, wróć do lobby
+            // Jeśli gra się resetuje lub kończy, wróć do lobby.
+            // Ten mechanizm zapewnia, że wszyscy klienci odświeżają się, gdy host resetuje grę.
             else if (!newGameData || newGameData.status === "LOBBY") {
                 if(gameScreen.classList.contains('d-none') === false){
                      location.reload(); // Prosty sposób na reset UI
@@ -144,6 +145,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
 
     function renderLobby() {
         lobbyList.innerHTML = '';
@@ -1036,10 +1038,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function restartGame() {
         // Only the host can reset the game state
         if (amIHost) {
+            // Resetting gameState to "LOBBY" and clearing players.
+            // This change in Firebase will be detected by all connected clients' gameState listeners,
+            // triggering a `location.reload()` on each client, effectively restarting the game for everyone.
             db.ref("gameState").set({ status: "LOBBY" });
             db.ref("players").set(null); // Clear all players
         }
-        location.reload(); // Explicitly refresh the page
+        location.reload(); // Explicitly refresh the page for the host
     }
 
     function renderCashout() {
