@@ -408,8 +408,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Aktualizuj UI na podstawie danych z bazy
         influenceCostEl.textContent = roll.influenceCost || 0;
-        const rollerName = playersData[roll.rollerId]?.name || '';
-        diceRollerInfo.textContent = `Rzut dla ${rollerName}`;
+        // const rollerName = playersData[roll.rollerId]?.name || '';
+        diceRollerInfo.textContent = '';
         
         // Jeśli rzut właśnie się rozpoczął
         if (roll.isRolling && !lastIsRollingState) {
