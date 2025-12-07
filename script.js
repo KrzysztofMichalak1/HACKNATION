@@ -441,10 +441,13 @@ document.addEventListener('DOMContentLoaded', () => {
             trueValueText.innerHTML = `Ostateczny wynik: <span class="text-warning fw-bold">${roll.finalValue}</span>`;
             
             if (roll.turnSummary && roundSummaryEl) {
+                const prizeColor = roll.turnSummary.prize.value >= 0 ? 'text-success' : 'text-danger';
+                const totalColor = roll.turnSummary.total.value >= 0 ? 'text-success' : 'text-danger';
+
                 roundSummaryEl.innerHTML = `
-                    <p class="mb-0 text-white"><small>${roll.turnSummary.prize}</small></p>
-                    <p class="mb-0 text-white"><small>${roll.turnSummary.cost}</small></p>
-                    <p class="fw-bold text-white"><small>${roll.turnSummary.total}</small></p>
+                    <p class="mb-0 ${prizeColor}"><small>${roll.turnSummary.prize.text}</small></p>
+                    <p class="mb-0 text-warning"><small>${roll.turnSummary.cost.text}</small></p>
+                    <p class="fw-bold ${totalColor}"><small>${roll.turnSummary.total.text}</small></p>
                 `;
             }
         }
@@ -551,9 +554,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const budgetChange = prize - totalInfluenceCost;
 
             const turnSummary = {
-                prize: `Wygrana/Przegrana z zakładu: ${prize > 0 ? '+' : ''}${prize} PLN`,
-                cost: `Koszt wpływu: -${totalInfluenceCost} PLN`,
-                total: `Suma: ${budgetChange > 0 ? '+' : ''}${budgetChange} PLN`
+                prize: {
+                    text: `Wygrana/Przegrana z zakładu: ${prize > 0 ? '+' : ''}${prize} PLN`,
+                    value: prize
+                },
+                cost: {
+                    text: `Koszt wpływu: -${totalInfluenceCost} PLN`,
+                    value: totalInfluenceCost
+                },
+                total: {
+                    text: `Suma: ${budgetChange > 0 ? '+' : ''}${budgetChange} PLN`,
+                    value: budgetChange
+                }
             };
 
             let outcomeMessage = `Na kostce: ${roll.baseValue}. Wynik końcowy: ${roll.finalValue}. ${player.name} ${win ? `wygrywa` : `przegrywa`}.`;
