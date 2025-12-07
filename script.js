@@ -434,8 +434,19 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Handle final result text visibility
         trueValueText.innerHTML = "";
+        const roundSummaryEl = document.getElementById('round-summary');
+        if(roundSummaryEl) roundSummaryEl.innerHTML = "";
+
         if (!roll.isRolling) { // Always show final result when roll is over
             trueValueText.innerHTML = `Ostateczny wynik: <span class="text-warning fw-bold">${roll.finalValue}</span>`;
+            
+            if (roll.turnSummary && roundSummaryEl) {
+                roundSummaryEl.innerHTML = `
+                    <p class="mb-0 text-white"><small>${roll.turnSummary.prize}</small></p>
+                    <p class="mb-0 text-white"><small>${roll.turnSummary.cost}</small></p>
+                    <p class="fw-bold text-white"><small>${roll.turnSummary.total}</small></p>
+                `;
+            }
         }
         
         lastIsRollingState = roll.isRolling;
