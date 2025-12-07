@@ -3,6 +3,8 @@
 > **Wyzwanie:** Gaming: Los decyduje (Totalizator Sportowy)  
 > **Kategoria:** F2P / Social Gambling / Skill-based RNG
 
+# 🎥 [KLIKNIJ, ABY ZOBACZYĆ WIDEO PREZENTACJĘ (YouTube)](TWOJ_LINK_DO_FILMU)
+
 ## 📖 O projekcie: Hazard jako Sport Zespołowy
 
 **ZRZUTKA** to nie jest zwykła gra losowa. To **"Teamfight Tactics" w świecie hazardu**. 
