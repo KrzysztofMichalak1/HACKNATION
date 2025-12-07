@@ -150,7 +150,7 @@ body {
     border-radius: 1rem;
     display: flex; /* Use flexbox for two columns */
     justify-content: space-around; /* Distribute space between sections */
-    align-items: center;
+    /* align-items: center; */
     padding: 1.5rem;
     margin-bottom: 2rem;
     min-width: 350px;
