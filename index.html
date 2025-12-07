@@ -49,6 +49,9 @@
                     <button id="history-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#historyModal">
                         Historia
                     </button>
+                    <button id="budget-plot-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#budgetPlotModal">
+                        Wykres
+                    </button>
                     <div class="text-end">
                         <h4>WSPÓLNA KASA</h4>
                         <h3 id="shared-budget" class="mb-0">100 PLN</h3>
@@ -126,10 +129,29 @@
         </div>
     </div>
 
+    <!-- Modal Wykresu Budżetu -->
+    <div class="modal fade" id="budgetPlotModal" tabindex="-1" aria-labelledby="budgetPlotModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="budgetPlotModalLabel">Wykres Budżetu Drużyny</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <canvas id="budget-chart"></canvas>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- FIREBASE (Wymagane do gry online) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

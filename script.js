@@ -155,6 +155,7 @@ document.addEventListener('DOMContentLoaded', () => {
             status: "PLAYING",
             round: 1,
             sharedBudget: 100,
+            budgetHistory: [100], // Initialize budget history
             currentPlayerIndex: 0,
             turnOrder: playerIds.sort(), // Ustalona kolejność graczy
             lastResultMessage: '',
@@ -626,7 +627,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // Prepare database updates
             let updates = {};
-            updates['/gameState/sharedBudget'] = state.sharedBudget + budgetChange;
+            const newBudget = state.sharedBudget + budgetChange;
+            updates['/gameState/sharedBudget'] = newBudget;
+
+            const budgetHistory = state.budgetHistory || [100];
+            budgetHistory.push(newBudget);
+            updates['/gameState/budgetHistory'] = budgetHistory;
+            
             updates['/gameState/currentRoll/isRolling'] = false;
             updates['/gameState/lastResultMessage'] = outcomeMessage;
             updates['/gameState/currentRoll/turnSummary'] = turnSummary;
@@ -709,4 +716,45 @@ document.addEventListener('DOMContentLoaded', () => {
         historyLog.appendChild(list);
     }
     historyModal.addEventListener('show.bs.modal', renderHistory);
+
+    // ======================================================
+    // 10. WYKRES BUDŻETU
+    // ======================================================
+    let budgetChart = null; // To hold the chart instance
+
+    function renderBudgetPlot() {
+        if (!gameData || !gameData.budgetHistory) return;
+
+        const ctx = document.getElementById('budget-chart').getContext('2d');
+        
+        if (budgetChart) {
+            budgetChart.destroy(); // Destroy previous chart instance
+        }
+
+        budgetChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: Array.from({length: gameData.budgetHistory.length}, (_, i) => `Runda ${i}`),
+                datasets: [{
+                    label: 'Budżet Drużyny',
+                    data: gameData.budgetHistory,
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: false
+                    }
+                }
+            }
+        });
+    }
+
+    const budgetPlotModal = document.getElementById('budgetPlotModal');
+    if (budgetPlotModal) {
+        budgetPlotModal.addEventListener('show.bs.modal', renderBudgetPlot);
+    }
 });
