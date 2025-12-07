@@ -73,6 +73,8 @@ body {
     background-color: var(--lotto-blue);
     color: var(--lotto-text-light);
     border-radius: 0.5rem;
+    padding-top: 8rem; /* Adjusted padding to push content below the fixed title */
+    justify-content: space-between !important; /* Ensure left and right alignment of remaining items */
 }
 
 #game-screen h2, #shared-budget {
@@ -150,7 +152,7 @@ body {
     border-radius: 1rem;
     display: flex; /* Use flexbox for two columns */
     justify-content: space-around; /* Distribute space between sections */
-    align-items: center;
+    /* align-items: center; */
     padding: 1.5rem;
     margin-bottom: 2rem;
     min-width: 350px;
@@ -161,7 +163,7 @@ body {
 #dice-info-section {
     display: flex;
     flex-direction: column;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center; /* Align text to the left */
     flex: 1; /* Allow left section to grow and take available space */
     padding-right: 1rem; /* Add some spacing between sections */
@@ -202,7 +204,7 @@ body {
     margin-top: 5px;
     font-size: 0.9rem;
     width: 100%; /* Ensure it takes full width of its container */
-    text-align: left; /* Align text to the left */
+    text-align: center; /* Align text to the left */
 }
 
 .scene {
@@ -274,4 +276,127 @@ body {
 .modal-backdrop {
     transform: scale(1.25);
     transform-origin: top left;
+}
+.text-lotto-yellow-strong {
+    color: ffd700 !important; /* A brighter gold color */
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.7), 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.text-strong-success {
+    color: #28a745 !important; /* Bootstrap success color */
+    text-shadow: 0 0 5px rgba(40, 167, 69, 0.7), 0 0 10px rgba(40, 167, 69, 0.5);
+}
+
+.text-strong-danger {
+    color: #dc3545 !important; /* Bootstrap danger color */
+    text-shadow: 0 0 5px rgba(220, 53, 69, 0.7), 0 0 10px rgba(220, 53, 69, 0.5);
+}
+
+.summary-square {
+    width: 50px;
+    height: 50px;
+    border-radius: 5px;
+    font-size: 1.2rem;
+    font-weight: bold;
+}
+
+.summary-total-square {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border: 2px solid white;
+}
+
+#influence-controls .btn {
+    padding: 0.75rem 1.5rem; /* Increase padding */
+    font-size: 1.35rem; /* Slightly increase font size */
+}
+
+/* --- Bailout Panel --- */
+.bailout-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1060; /* Higher than Bootstrap modal backdrop */
+}
+
+.bailout-content {
+    color: white;
+    padding: 40px;
+    background-color: var(--lotto-blue);
+    border: 5px solid var(--lotto-yellow);
+    border-radius: 1rem;
+}
+
+#bailout-animation-container {
+    perspective: 1000px;
+}
+
+#bailout-coin {
+    width: 150px;
+    height: 150px;
+    position: relative;
+    margin: 20px auto;
+    transform-style: preserve-3d;
+}
+
+.coin-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    font-weight: bold;
+    backface-visibility: hidden;
+}
+
+.coin-front {
+    background-color: var(--lotto-success);
+    color: white;
+    transform: rotateY(0deg);
+}
+
+.coin-back {
+    background-color: var(--lotto-danger);
+    color: white;
+    transform: rotateY(180deg);
+}
+
+.app-title {
+    font-family: 'Bungee Spice', cursive;
+    font-size: 4rem;
+    color: var(--lotto-yellow);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    
+    /* Centering styles */
+    position: fixed;
+    top: 3rem; /* Adjusted space from the top */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    width: 100%;
+    text-align: center;
+    pointer-events: none; /* Make it non-interactive */
+}
+
+#lobby-screen .app-title {
+    position: static;
+    transform: none;
+    pointer-events: auto;
+    width: auto;
+    color: var(--lotto-blue); /* Change color for better visibility on light background */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Softer shadow */
 }

@@ -3,62 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lotto Gra w Kostki</title>
+    <title>ZRzutka</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Bungee+Spice&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
     <div class="container-fluid mt-4 px-5">
-        <!-- Ekran Ustawień Gry -->
-        <div id="setup-screen">
-            <h1 class="text-center">GRA W KOSTKI</h1>
-            <p class="text-center text-muted">Radosna zabawa!</p>
+        
+        <!-- EKRAN LOBBY (Zamiast wyboru graczy) -->
+        <div id="lobby-screen">
+            <h1 class="text-center mb-4 app-title">ZRZUTKA</h1>
             <div class="row justify-content-center">
                 <div class="col-md-6">
-                    <div class="card p-4">
+                    <div class="card p-4 shadow">
+                        <h3 class="text-center">Dołącz do gry</h3>
                         <div class="mb-3">
-                            <label for="player-count" class="form-label">Liczba graczy:</label>
-                            <select class="form-select" id="player-count">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4" selected>4</option>
-                            </select>
+                            <label for="username" class="form-label">Twoje Imię:</label>
+                            <input type="text" id="username" class="form-control" placeholder="Wpisz nick..." maxlength="12">
                         </div>
-                        <button id="start-game-btn" class="btn btn-primary w-100">Rozpocznij Grę</button>
+                        <button id="join-btn" class="btn btn-success w-100 btn-lg">DOŁĄCZ</button>
+                        
+                        <hr>
+                        <h5 class="text-center">Gracze w lobby:</h5>
+                        <ul id="lobby-list" class="list-group mb-3">
+                            <!-- Tu pojawią się gracze -->
+                            <li class="list-group-item text-muted text-center">Czekanie na graczy...</li>
+                        </ul>
+                        <div id="budget-allocation" style="display: none;">
+                            <hr>
+                            <h5 class="text-center">Podziel budżet (Suma musi wynosić 500):</h5>
+                            <div id="budget-inputs">
+                                <!-- Budget inputs will be generated here -->
+                            </div>
+                            <p id="budget-warning" class="text-danger mt-2" style="display: none;"></p>
+                        </div>
+
+                        <button id="start-online-btn" class="btn btn-primary w-100" style="display:none;">ROZPOCZNIJ GRĘ (Host)</button>
+                        <p id="waiting-msg" class="text-center mt-2 text-muted" style="display:none;">Czekanie aż host rozpocznie grę...</p>
                     </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- Ekran Ustawień Klawiszy -->
-        <div id="key-config-screen" class="d-none">
-            <h1 class="text-center">Ustawienia Sterowania</h1>
-            <p class="text-center text-muted">Każdy gracz klika w pole, a następnie naciska klawisz, którego chce używać.</p>
-            <div id="key-config-forms" class="row g-3 justify-content-center">
-                <!-- Formularze dla graczy zostaną dodane przez JS -->
-            </div>
-            <div class="text-center mt-4">
-                <button id="set-default-keys-btn" class="btn btn-secondary btn-lg me-2">Ustaw domyślne</button>
-                <button id="confirm-keys-btn" class="btn btn-primary btn-lg">Zatwierdź i graj</button>
             </div>
         </div>
 
         <!-- Główny Ekran Gry (początkowo ukryty) -->
         <div id="game-screen" class="d-none">
             <header class="d-flex justify-content-between align-items-center mb-4 p-3 rounded">
-                <h2 class="mb-0">Runda 1</h2>
+                <h2 class="mb-0">Runda <span id="round-display">1</span></h2>
+                <h1 class="mb-0 app-title">ZRzutka</h1>
                 <div class="d-flex align-items-center gap-3">
                     <button id="history-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#historyModal">
                         Historia
                     </button>
+                    <button id="budget-plot-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#budgetPlotModal">
+                        Wykres
+                    </button>
+                    <button id="ranking-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#rankingModal">
+                        Ranking
+                    </button>
+                    <button id="cashout-btn" class="btn btn-danger" style="display: none;">
+                        Cash Out
+                    </button>
                     <div class="text-end">
                         <h4>WSPÓLNA KASA</h4>
-                        <h3 id="shared-budget" class="mb-0">100 PLN</h3>
+                        <h3 id="shared-budget" class="mb-0">500 PKT</h3>
                     </div>
                 </div>
             </header>
@@ -78,16 +89,23 @@
 
                     <!-- Kolumna Kostki (prawa) -->
                     <div class="col-md-7">
-                        <div id="dice-roll-area" class="p-5 text-white rounded text-center d-flex justify-content-between align-items-center">
+                        <div id="dice-roll-area" class="p-5 text-white rounded text-center d-flex justify-content-between">
                             <div id="dice-info-section" class="text-start flex-grow-1 p-2">
-                                <h3 id="dice-roller-info"></h3>
-                                <p class="mt-3">Koszt wpływu: <span id="influence-cost">0</span> PLN</p>
-                                <div id="influence-controls" class="d-flex gap-2 justify-content-center mt-3">
-                                    <!-- Przyciski wpływu zostaną dodane przez JS -->
+                                <div id="top-info-controls">
+                                    <h3 id="dice-roller-info"></h3>
+                                    <p id="current-bet-display" class="text-center mt-3 fs-4 text-info fw-bold" style="color: #FBB900!important"></p>
+                                    <p class="mt-3 text-center">Koszt wpływu: <span id="influence-cost">0</span> PKT</p>
+                                    <div id="influence-controls" class="d-flex gap-2 justify-content-center mt-3">
+                                        <button id="btn-influence-plus" class="btn btn-success btn-lg" disabled>+1</button>
+                                        <button id="btn-influence-minus" class="btn btn-danger btn-lg" disabled>-1</button>
+                                    </div>
+                                    <p id="influence-result-text" class="mt-3 fw-bold text-warning text-center"></p>
+                                    <h4 id="true-value-text" class="mt-3"></h4>
                                 </div>
-                                <div id="influence-timer-message" class="mt-3 text-warning fw-bold" style="min-height: 40px; display: none;"></div>
-                                <p id="influence-result-text" class="mt-3 fw-bold text-warning text-center"></p>
-                                <h4 id="true-value-text" class="mt-3"></h4>
+                                <div id="bottom-info-display">
+                                    <div id="influence-timer-message" class="mt-3 text-warning fw-bold" style="min-height: 40px; display: none;"></div>
+                                    <div id="round-summary" class="mt-3 text-center"></div>
+                                </div>
                             </div>
                             <div id="dice-animation-section" class="p-2">
                                 <div class="scene">
@@ -105,6 +123,20 @@
                     </div>
                 </div>
             </main>
+        </div>
+    </div>
+
+    <!-- Bailout Draw Panel -->
+    <div id="bailout-panel" class="bailout-overlay d-none">
+        <div class="bailout-content text-center">
+            <h2 class="mb-4">Bailout!</h2>
+            <div id="bailout-animation-container">
+                <div id="bailout-coin" class="coin">
+                    <div class="coin-face coin-front">+50</div>
+                    <div class="coin-face coin-back">+0</div>
+                </div>
+            </div>
+            <h3 id="bailout-result-text" class="mt-4 d-none"></h3>
         </div>
     </div>
 
@@ -126,7 +158,87 @@
         </div>
     </div>
 
+    <!-- Modal Wykresu Budżetu -->
+    <div class="modal fade" id="budgetPlotModal" tabindex="-1" aria-labelledby="budgetPlotModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="budgetPlotModalLabel">Wykres Budżetu Drużyny</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <canvas id="budget-chart"></canvas>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Rankingu -->
+    <div class="modal fade" id="rankingModal" tabindex="-1" aria-labelledby="rankingModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rankingModalLabel">Ranking Graczy (Ratunki / Sabotaże)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="ranking-body">
+                    <!-- Ranking zostanie wygenerowany przez JS -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Cash Out -->
+    <div class="modal fade" id="cashoutModal" tabindex="-1" aria-labelledby="cashoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cashoutModalLabel">Podział Budżetu (Cash Out)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="cashout-body">
+                    <!-- Cash Out results will be generated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="close-cashout-modal-btn">Zamknij</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Email Input -->
+    <div class="modal fade" id="emailInputModal" tabindex="-1" aria-labelledby="emailInputModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="emailInputModalLabel">Wprowadź Adres E-mail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="cashout-email-input" class="form-label">Adres E-mail:</label>
+                        <input type="email" class="form-control" id="cashout-email-input" placeholder="name@example.com">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="button" class="btn btn-primary" id="submit-email-btn">Wyślij i Pokaż Podział</button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- FIREBASE (Wymagane do gry online) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
