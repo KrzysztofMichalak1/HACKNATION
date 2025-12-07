@@ -64,7 +64,7 @@
                     <button id="ranking-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#rankingModal">
                         Ranking
                     </button>
-                    <button id="cashout-btn" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cashoutModal" style="display: none;">
+                    <button id="cashout-btn" class="btn btn-danger" style="display: none;">
                         Cash Out
                     </button>
                     <div class="text-end">
@@ -207,6 +207,28 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Email Input -->
+    <div class="modal fade" id="emailInputModal" tabindex="-1" aria-labelledby="emailInputModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="emailInputModalLabel">Wprowadź Adres E-mail</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="cashout-email-input" class="form-label">Adres E-mail:</label>
+                        <input type="email" class="form-control" id="cashout-email-input" placeholder="name@example.com">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Anuluj</button>
+                    <button type="button" class="btn btn-primary" id="submit-email-btn">Wyślij i Pokaż Podział</button>
                 </div>
             </div>
         </div>

@@ -72,6 +72,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const cashoutBtn = document.getElementById('cashout-btn');
     const cashoutBody = document.getElementById('cashout-body');
 
+    const emailInputModal = document.getElementById('emailInputModal');
+    const cashoutEmailInput = document.getElementById('cashout-email-input');
+    const submitEmailBtn = document.getElementById('submit-email-btn');
+
     // ======================================================
     // 3. LOGIKA LOBBY
     // ======================================================
@@ -982,6 +986,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(rankingModal) {
         rankingModal.addEventListener('show.bs.modal', renderRanking);
+    }
+
+    if (cashoutBtn) {
+        cashoutBtn.addEventListener('click', () => {
+            const emailModal = new bootstrap.Modal(emailInputModal);
+            emailModal.show();
+        });
+    }
+
+    if (submitEmailBtn) {
+        submitEmailBtn.addEventListener('click', () => {
+            const email = cashoutEmailInput.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // Basic email validation regex
+
+            if (!emailRegex.test(email)) {
+                alert('Proszę wprowadzić poprawny adres e-mail.');
+                return;
+            }
+
+            const emailModalInstance = bootstrap.Modal.getInstance(emailInputModal);
+            if (emailModalInstance) {
+                emailModalInstance.hide();
+            }
+
+            const cashoutModalInstance = new bootstrap.Modal(cashoutModal);
+            cashoutModalInstance.show();
+        });
     }
 
     const cashoutModal = document.getElementById('cashoutModal');
