@@ -56,6 +56,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const trueValueText = document.getElementById('true-value-text');
     const btnInfluencePlus = document.getElementById('btn-influence-plus');
     const btnInfluenceMinus = document.getElementById('btn-influence-minus'); 
+    const currentBetDisplay = document.getElementById('current-bet-display');
 
     // Historia
     const historyModal = document.getElementById('historyModal');
@@ -410,6 +411,19 @@ document.addEventListener('DOMContentLoaded', () => {
         influenceCostEl.textContent = roll.influenceCost || 0;
         // const rollerName = playersData[roll.rollerId]?.name || '';
         diceRollerInfo.textContent = '';
+
+        // Display current bet information
+        const currentPlayerId = roll.rollerId;
+        const currentPlayer = playersData[currentPlayerId];
+        let betText = '';
+        if (currentPlayer && currentPlayer.bet) {
+            if (currentPlayer.bet.type === 'number') {
+                betText = `Zakład gracza: ${currentPlayer.name} postawił na ${currentPlayer.bet.value}`;
+            } else {
+                betText = `Zakład gracza: ${currentPlayer.name} postawił na ${currentPlayer.bet.type === 'even' ? 'Parzyste' : 'Nieparzyste'}`;
+            }
+        }
+        currentBetDisplay.textContent = betText;
         
         // Jeśli rzut właśnie się rozpoczął
         if (roll.isRolling && !lastIsRollingState) {
