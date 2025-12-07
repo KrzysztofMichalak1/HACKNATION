@@ -438,7 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if(roundSummaryEl) roundSummaryEl.innerHTML = "";
 
         if (!roll.isRolling) { // Always show final result when roll is over
-            trueValueText.innerHTML = `Ostateczny wynik: <span class="text-warning fw-bold">${roll.finalValue}</span>`;
+            trueValueText.innerHTML = `Ostateczny wynik: <span class="text-lotto-yellow-strong fw-bold">${roll.finalValue}</span>`;
             
             if (roll.turnSummary && roundSummaryEl) {
                 const prizeColor = roll.turnSummary.prize.value >= 0 ? 'text-success' : 'text-danger';

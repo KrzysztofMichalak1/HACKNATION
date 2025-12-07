@@ -275,3 +275,7 @@ body {
     transform: scale(1.25);
     transform-origin: top left;
 }
+.text-lotto-yellow-strong {
+    color: #ffd700 !important; /* A brighter gold color */
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.7), 0 0 10px rgba(255, 215, 0, 0.5);
+}
