@@ -154,8 +154,8 @@ document.addEventListener('DOMContentLoaded', () => {
         db.ref("gameState").set({
             status: "PLAYING",
             round: 1,
-            sharedBudget: 100,
-            budgetHistory: [100], // Initialize budget history
+            sharedBudget: 500,
+            budgetHistory: [500], // Initialize budget history
             usedBailoutThresholds: [],
             currentPlayerIndex: 0,
             turnOrder: playerIds.sort(), // Ustalona kolejność graczy
@@ -442,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Ustaw timer kosztu wpływu (tylko host)
         const costInterval = setInterval(() => {
-            db.ref("gameState/currentRoll/influenceCost").transaction(cost => (cost || 0) + 2);
+            db.ref("gameState/currentRoll/influenceCost").transaction(cost => (cost || 0) + 5);
         }, 1000);
 
         // Po zakończeniu rzutu, host finalizuje turę
@@ -640,10 +640,10 @@ document.addEventListener('DOMContentLoaded', () => {
             
             let bailoutAttempt = null;
             const usedThresholds = state.usedBailoutThresholds || [];
-            const thresholds = Array.from({length: 10}, (_, i) => -100 - i * 50); // [-100, -150, ..., -550]
+            const thresholds = Array.from({length: 8}, (_, i) => 400 - i * 50); // [400, 350, ..., 50]
 
             for (const threshold of thresholds) {
-                if (newBudget <= threshold && oldBudget > threshold && !usedThresholds.includes(threshold)) {
+                if (newBudget < threshold && oldBudget >= threshold && !usedThresholds.includes(threshold)) {
                     const success = Math.random() < 0.5;
                     bailoutAttempt = { threshold, success };
                     if (success) {
