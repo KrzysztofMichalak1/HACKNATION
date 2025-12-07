@@ -615,7 +615,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 rollerName: player.name, 
                 fullMessage: outcomeMessage, 
                 influences: roll.influences ?? null,
-                summary: turnSummary
+                summary: turnSummary,
+                bet: player.bet
             };
             db.ref('gameState/rollHistory').transaction(history => {
                 history = history || [];
@@ -657,16 +658,28 @@ document.addEventListener('DOMContentLoaded', () => {
     function renderHistory() {
         historyLog.innerHTML = '';
         if (!gameData || !gameData.rollHistory) {
-            historyLog.innerHTML = '<p class="text-center text-muted">Brak historii dla tej rundy.</p>';
+            historyLog.innerHTML = '<p class="text-center text-muted">Brak historii do wyświetlenia.</p>';
             return;
         }
         const history = gameData.rollHistory;
         const list = document.createElement('ul');
         list.className = 'list-group';
+
         [...history].reverse().forEach(entry => {
             const listItem = document.createElement('li');
-            listItem.className = 'list-group-item';
-            
+            const prizeValue = entry.summary.prize.value;
+            const itemColorClass = prizeValue > 0 ? 'list-group-item-success' : 'list-group-item-danger';
+            listItem.className = `list-group-item ${itemColorClass} mb-2`;
+
+            let betText = '';
+            if (entry.bet) {
+                if (entry.bet.type === 'number') {
+                    betText = `Postawiono na: <strong>${entry.bet.value}</strong>`;
+                } else {
+                    betText = `Postawiono na: <strong>${entry.bet.type === 'even' ? 'Parzyste' : 'Nieparzyste'}</strong>`;
+                }
+            }
+
             let influencesHTML = '';
             if (entry.influences) {
                 influencesHTML += '<ul class="list-unstyled mt-2 mb-0">';
@@ -677,8 +690,19 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             listItem.innerHTML = `
-                <div><strong>${entry.rollerName}:</strong> ${entry.fullMessage}</div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Runda dla: ${entry.rollerName}</h5>
+                    <span class="badge bg-dark">${betText}</span>
+                </div>
+                <hr>
+                <p class="mb-1">${entry.fullMessage}</p>
                 ${influencesHTML}
+                <hr>
+                <div class="text-end">
+                    <p class="mb-0"><small>${entry.summary.prize.text}</small></p>
+                    <p class="mb-0"><small>${entry.summary.cost.text}</small></p>
+                    <p class="fw-bold mb-0"><small>${entry.summary.total.text}</small></p>
+                </div>
             `;
             list.appendChild(listItem);
         });
