@@ -230,11 +230,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 
                 startBailoutAnimation(newBailout, () => {
                     updateHeaderUI();
+                    updateGameInfo();
                     handleRollUpdate(gameData.currentRoll);
                     renderPlayerCards();
                 });
             } else {
                 updateHeaderUI();
+                updateGameInfo();
                 handleRollUpdate(gameData.currentRoll);
                 renderPlayerCards();
             }
