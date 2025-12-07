@@ -1,53 +1,70 @@
-# 🎲 [ZRZUTKA] - Teamplayowy Hazard
+# 🎲 ZRZUTKA - Teamplayowy Hazard
 
 > **Wyzwanie:** Gaming: Los decyduje (Totalizator Sportowy)  
 > **Kategoria:** F2P / Social Gambling / Skill-based RNG
 
-## 📖 O projekcie
+## 📖 O projekcie: Hazard jako Sport Zespołowy
 
-**[NAZWA_PROJEKTU]** to innowacyjna gra przeglądarkowa, która redefiniuje pojęcie hazardu online, wprowadzając do niego **kooperację (teamplay)** i elementy zręcznościowe. 
+**ZRZUTKA** to nie jest zwykła gra losowa. To **"Teamfight Tactics" w świecie hazardu**. 
 
-Zamiast samotnej walki z "systemem", gracze łączą siły w lobby, operując **wspólnym budżetem**. Gra wykorzystuje mechanikę **interwencji**, która pozwala członkom drużyny wpływać na wynik rzutu w czasie rzeczywistym – to mieszanka losowości, strategii i momentów typu "clutch" lub "troll".
+Większość gier losowych to samotne doświadczenie. My zmieniamy to w sport drużynowy. Wyobraź sobie ten moment w meczu, gdy zawodnik oddaje strzał z połowy boiska. Strategicznie? To głupota. Statystycznie? Nie ma szans. Ale jeśli trafi – to jest **GOL SEZONU**, a trybuny szaleją. 
+
+W **ZRZUTCE** dajemy graczom właśnie to narzędzie: możliwość irracjonalnego, ryzykownego wpłynięcia na wynik za wspólną kasę. Jeśli się uda – jesteś bohaterem ("Clutch"). Jeśli nie – zrujnowałeś budżet drużyny i czeka Cię lincz ("Troll").
 
 ---
 
-## ⚙️ Główne mechaniki rozgrywki
+## 💣 Dlaczego to lepsze niż Lootboxy? (The CS:GO Factor)
 
-### 1. Wspólny Portfel i Lobby
-* **Teamplay:** Drużyna gra jako jedność. Porażka jednego gracza obciąża wszystkich, wygrana powiększa wspólną pulę.
-* **Host:** Decyduje o początkowym podziale wkładu, co buduje dynamikę społeczną jeszcze przed startem.
-* **Jeden rzut:** W danej rundzie rzuca tylko właściciel kostki, reszta obserwuje i reaguje.
+Mentorzy i rynek wskazują, że gracze kochają dreszczyk emocji przy otwieraniu skrzynek w CS:GO. My wzięliśmy ten mechanizm i naprawiliśmy jego największą wadę: bierność.
 
-### 2. Zakłady i Transparentność
-* Gracz obstawia wynik (Parzyste/Nieparzyste lub konkretne liczby 1-6) przy wysokich kursach.
-* Pełna transparentność zasad – brak ukrytych mechanik typu "lootbox".
+| Otwieranie skrzynek (CS:GO) | ZRZUTKA (Nasz Projekt) |
+| :--- | :--- |
+| **Samotność / Streaming** | **Pełna Kooperacja** |
+| Oglądasz, jak koledze wypada nóż (lub śmieć). Możesz tylko krzyczeć "WOW". | Grasz razem z kolegami. Twój ruch może uratować ich zakład. |
+| **Brak wpływu** | **Interwencja (Skill)** |
+| Klikasz i czekasz. Los decyduje w 100%. | Widzisz, że wynik jest słaby? Wtrącasz się! Masz wpływ na "los". |
+| **Emocje** | **Emocje + Odpowiedzialność** |
+| "Szkoda, że ci nie wypadło". | "Dlaczego tego nie podbiłeś?! Mogliśmy wygrać!" – element **obwiniania się i wspólnej euforii**. |
 
-### 3. System Interwencji (Skill-based RNG)
-To nasz wyróżnik na tle konkurencji. Podczas gdy wirtualna kostka się toczy:
-* Pozostali gracze mogą wpłynąć na wynik (+/- 1 oczko).
-* **Dynamiczny koszt (Risk/Reward):** Im później gracz zdecyduje się na interwencję (im bliżej wyniku), tym więcej musi zapłacić ze wspólnego budżetu.
-* **Antycypacja:** Od pewnego momentu interwencja jest zablokowana ("no more bets"), co buduje napięcie.
+Budujemy na "ziomkowstwie". To cyfrowy odpowiednik wspólnego darcia się na sędziego lub rzucania się sobie w ramiona po wygranym meczu.
 
-### 4. Mechaniki Retencji i "Near-Win"
-* **Bailout / Druga Szansa:** Jeśli drużyna straci określoną kwotę (np. 100, 150, 200), aktywuje się mechanika ratunkowa. Drużyna ma **50% szans** na zmniejszenie straty o 50 jednostek.
-* **Ranking:** Gra śledzi udane ratunki i przypadkowe "trollowanie", co napędza rywalizację wewnątrz grupy.
+---
 
-### 5. Lead Generation & Checkout
-* Przy wyjściu z gry (Checkout), budżet jest dzielony proporcjonalnie do wkładu.
-* Warunkiem realizacji wypłaty (zapisania wyniku) jest podanie adresu e-mail.
+## ⚙️ Główne mechaniki
+
+### 1. Wspólny Portfel (One Team, One Dream)
+* **Budżet:** Drużyna gra jako jedność przeciwko systemowi.
+* **Dynamika:** Host ustawia podział wkładu, ale odpowiedzialność jest zbiorowa. Porażka jednego gracza boli wszystkich (dosłownie, bo znika wspólna kasa).
+
+### 2. Decyzja Właściciela i Rzut
+* W każdej rundzie rzuca tylko jeden gracz (właściciel kostki).
+* **Wybór Zakładu:** To właściciel decyduje o ryzyku. Wybiera opcję bezpieczniejszą (**Parzyste/Nieparzyste**) lub ryzykuje celując w konkretną liczbę (**1, 2, 3, 4, 5 lub 6**) dla znacznie wyższego mnożnika.
+* Reszta drużyny obserwuje ten wybór ("Co on robi?!") i przygotowuje się do ewentualnej interwencji.
+
+### 3. System Interwencji (Mechanika "Clutch or Kick")
+To nasz "Game Changer". Podczas gdy wirtualna kostka się obraca:
+* Każdy z sojuszników może wydać wspólną kasę, by zmienić wynik (+/- 1 oczko).
+* **Rosnące Napięcie i Poczucie "Skilla":** Im później interweniujesz (tym bardziej skuteczna interwencja), tym droższa jest ta akcja.
+* **Dylemat:** Czy warto wydać 50% budżetu, by uratować zakład za 10% budżetu, ale utrzymać serię zwycięstw? Logika mówi "nie", emocje mówią "TAK".
+
+### 4. Ranking "Bohaterów i Trolli"
+* Gra śledzi interwencje. System nagradza udane ratunki i piętnuje nieudane próby pomocy.
+* To buduje narrację wewnątrz grupy: *"Nie dajcie mu klikać, ostatnio nas zrujnował!"*.
+
+### 5. Bailout & Checkout (Safety Net)
+* **Druga Szansa:** Jeśli drużyna straci np. 100 jednostek, aktywuje się mechanika "rzutu ostatniej szansy" (50% szans na odzyskanie części strat). To moment "być albo nie być".
+* **Lead Generation:** Przy wypłacie wygranej (podział łupów), wymagamy adresu e-mail.
 
 ---
 
 ## 🎯 Realizacja celów wyzwania (HackNation)
 
-Projekt bezpośrednio odpowiada na kryteria Totalizatora Sportowego:
-
 | Wymaganie | Nasze Rozwiązanie |
 | :--- | :--- |
-| **Losowość jako motor emocji** | Klasyczny rzut kością wzbogacony o interakcję czasu rzeczywistego. |
-| **Near-win experience** | Możliwość fizycznego wpłynięcia na kostkę. Poczucie "było tak blisko" jest potęgowane przez decyzję o użyciu interwencji. |
-| **Aspekt społecznościowy** | Wspólny budżet, wzajemna pomoc, wspólne przeżywanie wyniku. |
-| **Lead Generation** | E-mail wymagany przy podziale łupów (checkout). |
+| **Losowość jako motor emocji** | Losowość jest tu początkiem, a nie końcem. Emocje generuje walka z tą losowością. |
+| **Near-win experience** | Mechanika interwencji to dosłowne zmaterializowanie "Near-win". Było blisko? Mogłeś to zmienić, ale stchórzyłeś! |
+| **Aspekt społecznościowy** | Przeniesienie doświadczenia "LAN party" do hazardu online. |
+| **Lead Generation** | Naturalny checkout po emocjonującej rozgrywce. |
 
 ---
 
@@ -67,28 +84,29 @@ System najpierw losuje $\alpha$, a następnie generuje funkcję przejścia, co z
 
 ---
 
-## 🛠️ Technologie
+## 🛠️ Technologie i Architektura
 
-* **Frontend:** [Technologia, np. React / Phaser]
-* **Backend:** [Technologia, np. Node.js / Socket.io]
-* **Design:** Mobile First / Responsive Web Design
+Zdecydowaliśmy się na sprawdzony, lekki stack technologiczny ("Vanilla Web"). Dzięki temu aplikacja jest łatwo przenośna i działa natychmiastowo na dowolnym komputerze z przeglądarką, bez skomplikowanej konfiguracji środowiska.
 
+* **Backend & Synchronizacja: Firebase Realtime Database**
+    * Serce systemu. Odpowiada za błyskawiczną synchronizację stanu gry między różnymi maszynami. Dzięki temu gra działa płynnie, niezależnie od tego, na jakim komputerze jest uruchomiona.
+    
+* **Logika Gry: JavaScript (ES6+)**
+    * Czysty kod bez ciężkich frameworków. Zapewnia pełną kontrolę nad logiką i łatwość w przenoszeniu projektu między stanowiskami (Portability).
 ---
 
 ## 💿 Jak uruchomić projekt
 
-1.  Sklonuj repozytorium:
-    ```bash
-    git clone [LINK_DO_REPO]
-    ```
-2.  Zainstaluj zależności:
-    ```bash
-    npm install
-    ```
-3.  Uruchom serwer deweloperski:
-    ```bash
-    npm start
-    ```
+Aplikacja jest zaprojektowana tak, aby działała natychmiastowo ("Plug & Play"). Nie wymaga instalowania serwerów, Node.js ani Python.
+
+### Instrukcja:
+1.  Pobierz folder z projektem.
+2.  Otwórz plik `index.html` w dowolnej nowoczesnej przeglądarce (Chrome, Firefox, Edge).
+3.  Gotowe!
+
+⚠️ **Ważna uwaga:**
+Gra wymaga **aktywnego połączenia z Internetem**. 
+Wykorzystujemy **Firebase Realtime Database** do synchronizacji graczy. Bez dostępu do sieci gra nie połączy się z lobby.
 
 ---
-*Projekt stworzony na Hackathon Totalizator Sportowy 2024.*
+*Projekt stworzony na HACKNATION 2025.*
