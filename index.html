@@ -33,6 +33,14 @@
                             <!-- Tu pojawią się gracze -->
                             <li class="list-group-item text-muted text-center">Czekanie na graczy...</li>
                         </ul>
+                        <div id="budget-allocation" style="display: none;">
+                            <hr>
+                            <h5 class="text-center">Podziel budżet (Suma musi wynosić 500):</h5>
+                            <div id="budget-inputs">
+                                <!-- Budget inputs will be generated here -->
+                            </div>
+                            <p id="budget-warning" class="text-danger mt-2" style="display: none;"></p>
+                        </div>
 
                         <button id="start-online-btn" class="btn btn-primary w-100" style="display:none;">ROZPOCZNIJ GRĘ (Host)</button>
                         <p id="waiting-msg" class="text-center mt-2 text-muted" style="display:none;">Czekanie aż host rozpocznie grę...</p>
@@ -55,6 +63,9 @@
                     </button>
                     <button id="ranking-btn" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#rankingModal">
                         Ranking
+                    </button>
+                    <button id="cashout-btn" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#cashoutModal" style="display: none;">
+                        Cash Out
                     </button>
                     <div class="text-end">
                         <h4>WSPÓLNA KASA</h4>
@@ -183,6 +194,24 @@
         </div>
     </div>
 
+    <!-- Modal Cash Out -->
+    <div class="modal fade" id="cashoutModal" tabindex="-1" aria-labelledby="cashoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cashoutModalLabel">Podział Budżetu (Cash Out)</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="cashout-body">
+                    <!-- Cash Out results will be generated here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                </div>
+            </div>
+        </div>
+    </div>
+ 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <!-- FIREBASE (Wymagane do gry online) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>

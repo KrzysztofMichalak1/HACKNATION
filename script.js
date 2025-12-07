@@ -44,6 +44,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const waitingMsg = document.getElementById('waiting-msg');
     const usernameInput = document.getElementById('username');
     const joinBtn = document.getElementById('join-btn');
+    const budgetAllocation = document.getElementById('budget-allocation');
+    const budgetInputs = document.getElementById('budget-inputs');
+    const budgetWarning = document.getElementById('budget-warning');
+
 
     // Gra
     const playersContainer = document.getElementById('players-container');
@@ -64,6 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // Historia
     const historyModal = document.getElementById('historyModal');
     const historyLog = document.getElementById('history-log');
+
+    const cashoutBtn = document.getElementById('cashout-btn');
+    const cashoutBody = document.getElementById('cashout-body');
 
     // ======================================================
     // 3. LOGIKA LOBBY
@@ -135,19 +142,81 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function renderLobby() {
         lobbyList.innerHTML = '';
-        const playerKeys = Object.keys(playersData);
+        budgetInputs.innerHTML = '';
+        const playerIds = Object.keys(playersData);
 
-        if (playerKeys.length === 0) {
+        if (playerIds.length === 0) {
             lobbyList.innerHTML = '<li class="list-group-item text-muted text-center">Czekanie na graczy...</li>';
+            budgetAllocation.style.display = 'none';
             return;
         }
+
+        budgetAllocation.style.display = 'block';
+        
+        // Calculate even split
+        const totalPlayers = playerIds.length;
+        const baseBudget = Math.floor(500 / totalPlayers);
+        let remainder = 500 % totalPlayers;
+
+        const playerBudgets = {};
+        playerIds.forEach((id, index) => {
+            playerBudgets[id] = baseBudget + (index < remainder ? 1 : 0);
+        });
 
         Object.values(playersData).forEach(p => {
             const li = document.createElement('li');
             li.className = "list-group-item";
             li.textContent = p.name + (p.id === myId ? " (Ty)" : "");
             lobbyList.appendChild(li);
+
+            const budgetInputDiv = document.createElement('div');
+            budgetInputDiv.className = 'input-group mb-2';
+            
+            const playerNameSpan = document.createElement('span');
+            playerNameSpan.className = 'input-group-text';
+            playerNameSpan.textContent = p.name;
+            
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.className = 'form-control budget-input';
+            // Set initial value to the calculated even split
+            input.value = playerBudgets[p.id] || 0; 
+            input.dataset.playerId = p.id;
+            
+            if (!amIHost) {
+                input.disabled = true;
+            }
+
+            budgetInputDiv.appendChild(playerNameSpan);
+            budgetInputDiv.appendChild(input);
+            budgetInputs.appendChild(budgetInputDiv);
         });
+
+        const checkBudget = () => {
+            const inputs = document.querySelectorAll('.budget-input');
+            let totalBudget = 0;
+            inputs.forEach(i => {
+                totalBudget += parseInt(i.value, 10) || 0;
+            });
+
+            if (totalBudget !== 500) {
+                budgetWarning.textContent = `Suma budżetów musi wynosić 500. Obecnie: ${totalBudget}`;
+                budgetWarning.style.display = 'block';
+                if (amIHost) {
+                    startOnlineBtn.disabled = true;
+                }
+            } else {
+                budgetWarning.style.display = 'none';
+                if (amIHost) {
+                    startOnlineBtn.disabled = false;
+                }
+            }
+        };
+
+        if (amIHost) {
+            budgetInputs.addEventListener('input', checkBudget);
+        }
+        checkBudget(); // Initial check
     }
 
     // Host klika START
@@ -155,11 +224,22 @@ document.addEventListener('DOMContentLoaded', () => {
         const playerIds = Object.keys(playersData);
         if(playerIds.length === 0) return;
 
+        const initialBudgets = {};
+        const inputs = document.querySelectorAll('.budget-input');
+        inputs.forEach(input => {
+            const playerId = input.dataset.playerId;
+            const budget = parseInt(input.value, 10) || 0;
+            if (playerId) {
+                initialBudgets[playerId] = budget;
+            }
+        });
+
         // Inicjalizacja stanu gry w bazie
         db.ref("gameState").set({
             status: "PLAYING",
             round: 1,
             sharedBudget: 500,
+            initialBudgets: initialBudgets,
             budgetHistory: [500], // Initialize budget history
             usedBailoutThresholds: [],
             currentPlayerIndex: 0,
@@ -276,6 +356,10 @@ document.addEventListener('DOMContentLoaded', () => {
         sharedBudgetEl.classList.remove('text-success', 'text-danger', 'fw-bold');
         if (gameData.sharedBudget > 100) sharedBudgetEl.classList.add('text-success', 'fw-bold');
         else if (gameData.sharedBudget < 100) sharedBudgetEl.classList.add('text-danger', 'fw-bold');
+        
+        if (amIHost) {
+            cashoutBtn.style.display = 'block';
+        }
     }
 
     function renderRoundSummary(history) {
@@ -898,5 +982,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if(rankingModal) {
         rankingModal.addEventListener('show.bs.modal', renderRanking);
+    }
+
+    const cashoutModal = document.getElementById('cashoutModal');
+    if (cashoutModal) {
+        cashoutModal.addEventListener('show.bs.modal', renderCashout);
+    }
+
+    function renderCashout() {
+        cashoutBody.innerHTML = '';
+        if (!gameData || !gameData.initialBudgets || !playersData) {
+            cashoutBody.innerHTML = '<p class="text-center text-muted">Brak danych do podziału budżetu.</p>';
+            return;
+        }
+
+        const currentSharedBudget = gameData.sharedBudget;
+        const initialBudgets = gameData.initialBudgets;
+        const totalInitialBudget = 500; // This is always 500 based on lobby validation
+
+        let tableHTML = `
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th scope="col">Gracz</th>
+                        <th scope="col">Udział Początkowy (PKT)</th>
+                        <th scope="col">Udział Początkowy (%)</th>
+                        <th scope="col">Końcowy Budżet (PKT)</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+
+        Object.keys(initialBudgets).forEach(playerId => {
+            const playerName = playersData[playerId]?.name || `Nieznany (${playerId})`;
+            const initialContribution = initialBudgets[playerId];
+            const percentage = (initialContribution / totalInitialBudget) * 100;
+            const finalShare = (percentage / 100) * currentSharedBudget;
+
+            tableHTML += `
+                <tr>
+                    <td>${playerName}</td>
+                    <td>${initialContribution}</td>
+                    <td>${percentage.toFixed(2)}%</td>
+                    <td>${finalShare.toFixed(2)}</td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `
+                </tbody>
+            </table>
+            <h5 class="mt-4 text-end">Całkowity budżet do podziału: ${currentSharedBudget} PKT</h5>
+        `;
+
+        cashoutBody.innerHTML = tableHTML;
     }
 });
