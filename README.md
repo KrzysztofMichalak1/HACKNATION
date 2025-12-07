@@ -3,7 +3,7 @@
 > **Wyzwanie:** Gaming: Los decyduje (Totalizator Sportowy)  
 > **Kategoria:** F2P / Social Gambling / Skill-based RNG
 
-# 🎥 [KLIKNIJ, ABY ZOBACZYĆ WIDEO PREZENTACJĘ (YouTube)](TWOJ_LINK_DO_FILMU)
+# 🎥 [KLIKNIJ, ABY ZOBACZYĆ WIDEO PREZENTACJĘ (YouTube)](https://www.youtube.com/watch?v=7L8bn5eIWyo)
 
 ## 📖 O projekcie: Hazard jako Sport Zespołowy
 
