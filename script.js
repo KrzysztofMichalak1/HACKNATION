@@ -255,12 +255,12 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateGameInfo() {
         if (!gameData || !gameData.turnOrder || !playersData) return;
         
+        gameInfoEl.innerHTML = renderRoundSummary(gameData.rollHistory);
+
         if (gameData.currentRoll.isRolling) {
-            gameInfoEl.textContent = ''; // Removed "Losowanie kostki gracza: ..."
             gameInfoEl.className = "alert alert-warning text-center fw-bold";
         } else {
-            gameInfoEl.innerHTML = renderRoundSummary(gameData.rollHistory);
-            gameInfoEl.className = "alert alert-light text-center"; // Changed to alert-light
+            gameInfoEl.className = "alert alert-light text-center";
         }
     }
 
