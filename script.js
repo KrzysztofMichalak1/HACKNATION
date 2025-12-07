@@ -482,12 +482,13 @@ document.addEventListener('DOMContentLoaded', () => {
             trueValueText.innerHTML = `Ostateczny wynik: <span class="text-lotto-yellow-strong fw-bold">${roll.finalValue}</span>`;
             
             if (roll.turnSummary && roundSummaryEl) {
-                const prizeColor = roll.turnSummary.prize.value >= 0 ? 'text-strong-success' : 'text-strong-danger';
+                const betWinningsColor = roll.turnSummary.betWinnings.value >= 0 ? 'text-strong-success' : 'text-strong-danger';
                 const totalColor = roll.turnSummary.total.value >= 0 ? 'text-strong-success' : 'text-strong-danger';
 
                 roundSummaryEl.innerHTML = `
-                    <p class="mb-0 ${prizeColor}"><small>${roll.turnSummary.prize.text}</small></p>
-                    <p class="mb-0 text-warning"><small>${roll.turnSummary.cost.text}</small></p>
+                    <p class="mb-0 ${betWinningsColor}"><small>${roll.turnSummary.betWinnings.text}</small></p>
+                    <p class="mb-0 text-secondary"><small>${roll.turnSummary.roundCost.text}</small></p>
+                    <p class="mb-0 text-warning"><small>${roll.turnSummary.influenceCost.text}</small></p>
                     <p class="fw-bold fs-1 ${totalColor}">${roll.turnSummary.total.text}</p>
                 `;
             }
@@ -585,23 +586,36 @@ document.addEventListener('DOMContentLoaded', () => {
             if (player.bet.type === 'odd' && roll.finalValue % 2 !== 0) win = true;
             if (player.bet.type === 'number' && roll.finalValue === player.bet.value) win = true;
 
-            const prize = win ? (player.bet.type === 'number' ? 50 : 10) : -5;
-            
+            let betWinnings = 0;
+            if (win) {
+                if (player.bet.type === 'number') {
+                    betWinnings = 45;
+                } else { // even or odd
+                    betWinnings = 15;
+                }
+            }
+
+            const roundCost = 15; // 1 round costs 15
+
             let totalInfluenceCost = 0;
             if(roll.influences) {
                 totalInfluenceCost = Object.values(roll.influences).reduce((sum, inf) => sum + inf.cost, 0);
             }
             
-            const budgetChange = prize - totalInfluenceCost;
+            const budgetChange = betWinnings - roundCost - totalInfluenceCost;
 
             const turnSummary = {
-                prize: {
-                    text: `Wygrana/Przegrana z zakładu: ${prize > 0 ? '+' : ''}${prize} PKT`,
-                    value: prize
+                betWinnings: {
+                    text: `Wygrana z zakładu: ${betWinnings > 0 ? '+' : ''}${betWinnings} PKT`,
+                    value: betWinnings
                 },
-                cost: {
+                roundCost: {
+                    text: `Koszt rundy: -${roundCost} PKT`,
+                    value: -roundCost
+                },
+                influenceCost: {
                     text: `Koszt wpływu: -${totalInfluenceCost} PKT`,
-                    value: totalInfluenceCost
+                    value: -totalInfluenceCost
                 },
                 total: {
                     text: `Suma: ${budgetChange > 0 ? '+' : ''}${budgetChange} PKT`,
@@ -669,8 +683,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         [...history].reverse().forEach(entry => {
             const listItem = document.createElement('li');
-            const prizeValue = entry.summary.prize.value;
-            const itemColorClass = prizeValue > 0 ? 'list-group-item-success' : 'list-group-item-danger';
+            const totalBudgetChange = entry.summary.total.value;
+            const itemColorClass = totalBudgetChange >= 0 ? 'list-group-item-success' : 'list-group-item-danger';
             listItem.className = `list-group-item ${itemColorClass} mb-2`;
 
             let betText = '';
@@ -701,8 +715,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 ${influencesHTML}
                 <hr>
                 <div class="text-end">
-                    <p class="mb-0"><small>${entry.summary.prize.text}</small></p>
-                    <p class="mb-0"><small>${entry.summary.cost.text}</small></p>
+                    <p class="mb-0"><small>${entry.summary.betWinnings.text}</small></p>
+                    <p class="mb-0"><small>${entry.summary.roundCost.text}</small></p>
+                    <p class="mb-0"><small>${entry.summary.influenceCost.text}</small></p>
                     <p class="fw-bold mb-0"><small>${entry.summary.total.text}</small></p>
                 </div>
             `;
