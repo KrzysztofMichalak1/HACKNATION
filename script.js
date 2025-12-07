@@ -648,28 +648,282 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function animateDice(baseValue) {
         clearTimeout(localState.animationTimeout);
-        
-        const rollDuration = 8000;
-        const randomSpinsX = Math.floor(Math.random() * 5 + 4);
-        const randomSpinsY = Math.floor(Math.random() * 5 + 4);
-        const finalAngle = getRotationForFace(baseValue); // Animate towards the base value
+        if (localState.currentAnimation) {
+            localState.currentAnimation.cancel();
+        }
 
-        const finalX = (randomSpinsX * 360) + finalAngle.x;
-        const finalY = (randomSpinsY * 360) + finalAngle.y;
-        
+        const rollDuration = 8000; // 8 sekund
+        const targetAngle = getRotationForFace(baseValue);
+
+        // ======================================================
+        // NOWY MODEL: ln(ω(t))/(T-t) = W(t) z warunkiem końcowym
+        // ======================================================
+        const path = generateWienerRotationPath(targetAngle, rollDuration / 1000);
+
+        // Animate using Web Animations API
+        const keyframes = generateKeyframesFromPath(path);
+        const animation = diceAnimationEl.animate(keyframes, {
+            duration: rollDuration,
+            easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+            fill: 'forwards'
+        });
+
+        // Store animation reference
+        localState.currentAnimation = animation;
+
+        // Po zakończeniu ustaw dokładny kąt
+        animation.onfinish = () => {
+            diceAnimationEl.style.transform = `rotateX(${targetAngle.x}deg) rotateY(${targetAngle.y}deg)`;
+            localState.currentAnimation = null;
+        };
+    }
+
+    // ======================================================
+    // GENEROWANIE ŚCIEŻKI Z PROCESEM WIENERA
+    // ======================================================
+    // ======================================================
+    // GENEROWANIE ŚCIEŻKI Z PROCESEM WIENERA
+    // ======================================================
+
+    function generateWienerRotationPath(targetAngle, totalTime, baseValue = 1) {
+        const dt = 0.016;
+        const steps = Math.floor(totalTime / dt);
+        const path = [];
+
+        // ======================================================
+        // MODEL WSTECZNY: generujemy od KOŃCA do POCZĄTKU
+        // ======================================================
+        const xStart = Math.log(0.5); // Mała prędkość na końcu (hamowanie)
+        const sigma = 0.3;
+
+        // Zaczynamy od CELU i idziemy wstecz
+        let angleX = (targetAngle.x * Math.PI) / 180;
+        let angleY = (targetAngle.y * Math.PI) / 180;
+
+        // Dodajemy pełne obroty WSTECZ (odejmujemy)
+        const fullCircle = 2 * Math.PI;
+        const spinsX = 4; // 4 pełne obroty wstecz
+        const spinsY = 4;
+
+        const startAngleX = angleX - spinsX * fullCircle;
+        const startAngleY = angleY - spinsY * fullCircle;
+
+        // Teraz W(t) będzie rosło OD CELU do POCZĄTKU
+        let Wx = xStart;
+        let Wy = xStart * 0.9;
+
+        // Tablica na przechowanie historii W(t) OD CELU DO POCZĄTKU
+        const W_history = [{ t: totalTime, Wx: Wx, Wy: Wy, angleX: angleX, angleY: angleY }];
+
+        console.log(`Model wsteczny: od celu ${targetAngle.x}° do startu ${(startAngleX * 180 / Math.PI).toFixed(1)}°`);
+
+        function gaussianRandom() {
+            let u = 0, v = 0;
+            while (u === 0) u = Math.random();
+            while (v === 0) v = Math.random();
+            return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v);
+        }
+
+        // ======================================================
+        // KROK 1: Generuj proces OD CELU DO POCZĄTKU
+        // ======================================================
+        for (let i = steps; i > 0; i--) {
+            const t = i * dt; // idziemy OD KOŃCA
+            const timeFromEnd = totalTime - t; // czas od końca
+
+            // Aktualizuj W wstecz (to trochę nietypowe)
+            // W praktyce generujemy normalnie, ale interpretujemy odwrotnie
+            const dWx = sigma * Math.sqrt(dt) * gaussianRandom();
+            const dWy = sigma * Math.sqrt(dt) * gaussianRandom();
+
+            Wx += dWx;
+            Wy += dWy;
+
+            // Oblicz prędkość WSTECZ (od końca): ω(t) = (T-t) * exp(W(t))
+            const remainingTime = totalTime - t;
+            const omegaX = remainingTime * Math.exp(Wx);
+            const omegaY = remainingTime * Math.exp(Wy);
+
+            // Idziemy WSTECZ w czasie, więc kąty maleją
+            angleX -= omegaX * dt;
+            angleY -= omegaY * dt;
+
+            // Zapisz stan w historii
+            W_history.unshift({
+                t: t,
+                Wx: Wx,
+                Wy: Wy,
+                angleX: angleX,
+                angleY: angleY,
+                omegaX: omegaX,
+                omegaY: omegaY
+            });
+        }
+
+        // ======================================================
+        // KROK 2: Odwróć czas aby mieć od POCZĄTKU do CELU
+        // ======================================================
+        for (let i = 0; i <= steps; i++) {
+            const state = W_history[i];
+            const t = state.t;
+
+            // Prędkość w "normalnym" czasie (od początku do końca)
+            // ω_normal(t) = ω_wstecz(T-t)
+            const omegaNormalX = state.omegaX;
+            const omegaNormalY = state.omegaY;
+
+            path.push({
+                time: t,
+                angles: {
+                    x: state.angleX * 180 / Math.PI,
+                    y: state.angleY * 180 / Math.PI
+                },
+                angularVelocities: {
+                    x: omegaNormalX,
+                    y: omegaNormalY
+                }
+            });
+        }
+
+        // Upewnij się, że końcowy kąt jest dokładny
+        const lastPoint = path[path.length - 1];
+        lastPoint.angles.x = targetAngle.x;
+        lastPoint.angles.y = targetAngle.y;
+
+        // Pierwszy punkt powinien być przy kącie startowym
+        const firstPoint = path[0];
+        console.log(`Start angle: ${firstPoint.angles.x.toFixed(1)}°, End angle: ${lastPoint.angles.x.toFixed(1)}°`);
+
+        return path;
+    }
+
+    // ======================================================
+    // GENEROWANIE KEYFRAMES Z ŚCIEŻKI
+    // ======================================================
+
+    function generateKeyframesFromPath(path) {
+        const keyframes = [];
+
+        // USUNIĘTE: funkcja addMicroJitter
+
+        // Konwertuj ścieżkę na keyframes
+        for (let i = 0; i < path.length; i++) {
+            const point = path[i];
+            const progress = point.time / path[path.length - 1].time;
+
+            // USUNIĘTE: drgania
+            // const jitterX = addMicroJitter(point.angles.x, point.time, 'x');
+            // const jitterY = addMicroJitter(point.angles.y, point.time, 'y');
+
+            keyframes.push({
+                offset: progress,
+                transform: `rotateX(${point.angles.x}deg) rotateY(${point.angles.y}deg)` // USUNIĘTE + jitter
+            });
+        }
+
+        // Upewnij się, że ostatnia klatka jest dokładna
+        const lastPoint = path[path.length - 1];
+        keyframes.push({
+            offset: 1,
+            transform: `rotateX(${lastPoint.angles.x}deg) rotateY(${lastPoint.angles.y}deg)`
+        });
+
+        return keyframes;
+    }
+
+    // ======================================================
+    // FALLBACK: Prosta animacja jeśli Web Animations API nie działa
+    // ======================================================
+
+    function animateDiceFallback(baseValue) {
+        clearTimeout(localState.animationTimeout);
+
+        const rollDuration = 8000;
+        const targetAngle = getRotationForFace(baseValue);
+
+        // Prostsza implementacja z interpolacją
+        const steps = 5;
+        const stepDuration = rollDuration / steps;
+
+        // Reset
         diceAnimationEl.style.transition = 'none';
-        // Trick to reset animation
-        diceAnimationEl.offsetHeight; 
-        
-        diceAnimationEl.style.transition = `transform ${rollDuration / 1000}s cubic-bezier(.15, .9, .3, 1)`;
+        diceAnimationEl.style.transform = 'rotateX(0deg) rotateY(0deg)';
+        diceAnimationEl.offsetHeight;
+
+        // Losowe obroty prowadzące do celu
+        const randomSpinsX = Math.floor(Math.random() * 4 + 3);
+        const randomSpinsY = Math.floor(Math.random() * 4 + 3);
+
+        const finalX = (randomSpinsX * 360) + targetAngle.x;
+        const finalY = (randomSpinsY * 360) + targetAngle.y;
+
+        diceAnimationEl.style.transition = `transform ${rollDuration / 1000}s cubic-bezier(0.2, 0.8, 0.4, 1)`;
         diceAnimationEl.style.transform = `rotateX(${finalX}deg) rotateY(${finalY}deg)`;
 
-        // After animation, ensure the dice visually rests on the base value face.
+        // Po animacji ustaw dokładny kąt
         localState.animationTimeout = setTimeout(() => {
-            const correctAngle = getRotationForFace(baseValue);
-            diceAnimationEl.style.transition = 'none';
-            diceAnimationEl.style.transform = `rotateX(${correctAngle.x}deg) rotateY(${correctAngle.y}deg)`;
+            diceAnimationEl.style.transition = 'transform 0.3s ease-out';
+            diceAnimationEl.style.transform = `rotateX(${targetAngle.x}deg) rotateY(${targetAngle.y}deg)`;
         }, rollDuration);
+    }
+
+    // ======================================================
+    // GŁÓWNA FUNKCJA ANIMACJI KOSTKI
+    // ======================================================
+
+    function animateDice(baseValue) {
+        clearTimeout(localState.animationTimeout);
+        if (localState.currentAnimation) {
+            localState.currentAnimation.cancel();
+        }
+
+        const rollDuration = 8000;
+        const targetAngle = getRotationForFace(baseValue);
+
+        // Sprawdź czy Web Animations API jest dostępne
+        if (typeof diceAnimationEl.animate === 'function') {
+            try {
+                // Użyj zaawansowanej animacji z procesem Wienera
+                const path = generateWienerRotationPath(targetAngle, rollDuration / 1000, baseValue); // DODALIŚMY baseValue
+                const keyframes = generateKeyframesFromPath(path);
+
+                const animation = diceAnimationEl.animate(keyframes, {
+                    duration: rollDuration,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+                    fill: 'forwards'
+                });
+
+                localState.currentAnimation = animation;
+
+                animation.onfinish = () => {
+                    diceAnimationEl.style.transform = `rotateX(${targetAngle.x}deg) rotateY(${targetAngle.y}deg)`;
+                    localState.currentAnimation = null;
+                };
+
+                return;
+            } catch (error) {
+                console.warn('Web Animations API error, using fallback:', error);
+            }
+        }
+
+        // Fallback na prostszą animację
+        animateDiceFallback(baseValue);
+    }
+
+    // ======================================================
+    // FUNKCJA POMOCNICZA DO OBRACANIA ŚCIANEK (już istnieje)
+    // ======================================================
+
+    function getRotationForFace(face) {
+        switch (face) {
+            case 1: return { x: 0, y: 0 };
+            case 2: return { x: 0, y: -90 };
+            case 3: return { x: -90, y: 0 };
+            case 4: return { x: 90, y: 0 };
+            case 5: return { x: 0, y: 90 };
+            case 6: return { x: 0, y: 180 };
+            default: return { x: 0, y: 0 };
+        }
     }
 
     function checkWin(value, bet) {
