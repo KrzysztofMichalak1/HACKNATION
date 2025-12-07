@@ -341,22 +341,32 @@ body {
 #bailout-coin {
     width: 150px;
     height: 150px;
-    line-height: 150px;
-    border-radius: 50%;
-    background-color: var(--lotto-yellow);
-    color: var(--lotto-blue);
-    font-size: 5rem;
-    font-weight: bold;
+    position: relative;
     margin: 20px auto;
-    transition: transform 0.8s;
     transform-style: preserve-3d;
 }
 
-.bailout-coin-spinning {
-    animation: spin 1s linear infinite;
+.coin-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3rem;
+    font-weight: bold;
+    backface-visibility: hidden;
 }
 
-@keyframes spin {
-    from { transform: rotateY(0deg); }
-    to { transform: rotateY(360deg); }
+.coin-front {
+    background-color: var(--lotto-success);
+    color: white;
+    transform: rotateY(0deg);
+}
+
+.coin-back {
+    background-color: var(--lotto-danger);
+    color: white;
+    transform: rotateY(180deg);
 }

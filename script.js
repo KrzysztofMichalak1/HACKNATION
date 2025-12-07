@@ -197,25 +197,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function startBailoutAnimation(bailoutData, onComplete) {
         bailoutPanel.classList.remove('d-none');
-        bailoutCoin.classList.add('bailout-coin-spinning');
-        bailoutResultText.textContent = '';
         
+        // Reset coin
+        bailoutCoin.style.transition = 'none';
+        bailoutCoin.style.transform = 'rotateY(0deg)';
+        
+        // Force reflow
+        bailoutCoin.offsetHeight; 
+
+        // Determine final angle
+        const finalAngle = bailoutData.success ? 360 * 4 : 180 + 360 * 4; // 4 full spins
+
+        // Apply animation
+        bailoutCoin.style.transition = 'transform 3s cubic-bezier(0.3, 0, 0.4, 1)';
+        bailoutCoin.style.transform = `rotateY(${finalAngle}deg)`;
+
         setTimeout(() => {
-            bailoutCoin.classList.remove('bailout-coin-spinning');
-            if(bailoutData.success) {
-                bailoutResultText.textContent = 'Success! +50 PKT!';
-                bailoutResultText.className = 'mt-4 text-success fw-bold';
-            } else {
-                bailoutResultText.textContent = 'No Luck This Time.';
-                bailoutResultText.className = 'mt-4 text-danger fw-bold';
-            }
-
-            setTimeout(() => {
-                bailoutPanel.classList.add('d-none');
-                onComplete();
-            }, 2000);
-
-        }, 3000);
+            bailoutPanel.classList.add('d-none');
+            onComplete();
+        }, 4500); // Total duration of animation + pause
     }
 
     function initGameListeners() {
