@@ -73,6 +73,8 @@ body {
     background-color: var(--lotto-blue);
     color: var(--lotto-text-light);
     border-radius: 0.5rem;
+    padding-top: 8rem; /* Adjusted padding to push content below the fixed title */
+    justify-content: space-between !important; /* Ensure left and right alignment of remaining items */
 }
 
 #game-screen h2, #shared-budget {
@@ -372,9 +374,29 @@ body {
 }
 
 .app-title {
-    font-size: 3rem; /* Bigger size */
-    color: var(--lotto-yellow); /* Yellow color */
-    font-weight: 900; /* Extra bold */
-    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Add some shadow for "cool" effect */
-    letter-spacing: 2px; /* A bit of spacing */
+    font-family: 'Bungee Spice', cursive;
+    font-size: 4rem;
+    color: var(--lotto-yellow);
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    
+    /* Centering styles */
+    position: fixed;
+    top: 3rem; /* Adjusted space from the top */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1050;
+    width: 100%;
+    text-align: center;
+    pointer-events: none; /* Make it non-interactive */
+}
+
+#lobby-screen .app-title {
+    position: static;
+    transform: none;
+    pointer-events: auto;
+    width: auto;
+    color: var(--lotto-blue); /* Change color for better visibility on light background */
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2); /* Softer shadow */
 }
