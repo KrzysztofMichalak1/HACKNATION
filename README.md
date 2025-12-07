@@ -70,22 +70,6 @@ To nasz "Game Changer". Podczas gdy wirtualna kostka się obraca:
 
 ---
 
-## 🚀 Planowany rozwój: Proceduralna Animacja Rzutu
-
-W kolejnej iteracji planujemy wdrożenie zaawansowanego modelu matematycznego dla animacji. Zamiast gotowych klipów, ruch kostki będzie generowany proceduralnie.
-
-Model opiera się na wygenerowaniu losowej funkcji rosnącej na przedziale czasu $[0,t]$, która spełnia warunki brzegowe w punktach stałych:
-* Punkt startowy: $(0,0)$
-* Punkt końcowy: $(t,\alpha)$
-
-Gdzie:
-* $t$ to czas trwania animacji.
-* $\alpha$ to kąt obrotu kostki, zależny od wylosowanej ścianki.
-
-System najpierw losuje $\alpha$, a następnie generuje funkcję przejścia, co zapewnia płynność i unikalność każdego rzutu.
-
----
-
 ## 🛠️ Technologie i Architektura
 
 Zdecydowaliśmy się na sprawdzony, lekki stack technologiczny ("Vanilla Web"). Dzięki temu aplikacja jest łatwo przenośna i działa natychmiastowo na dowolnym komputerze z przeglądarką, bez skomplikowanej konfiguracji środowiska.
