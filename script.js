@@ -442,7 +442,7 @@ document.addEventListener('DOMContentLoaded', () => {
         
         // Ustaw timer kosztu wpływu (tylko host)
         const costInterval = setInterval(() => {
-            db.ref("gameState/currentRoll/influenceCost").transaction(cost => (cost || 0) + 5);
+            db.ref("gameState/currentRoll/influenceCost").transaction(cost => (cost || 0) + 4);
         }, 1000);
 
         // Po zakończeniu rzutu, host finalizuje turę
