@@ -232,7 +232,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderRoundSummary(history) {
-        let summaryHTML = '<div class="d-flex justify-content-center gap-2 flex-wrap">';
+        let summaryHTML = '<div class="d-flex justify-content-center gap-2 flex-wrap align-items-center">';
         const historyToShow = (history || []).slice(-10); // Show last 10 rounds
 
         if (historyToShow.length === 0) {
@@ -248,6 +248,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
             });
         }
+        
+        // Calculate and add total sum square
+        if ((history || []).length > 0) {
+            const totalSum = (history || []).reduce((acc, entry) => acc + entry.summary.total.value, 0);
+            const totalColorClass = totalSum >= 0 ? 'bg-primary' : 'bg-dark'; // Different colors for total
+            summaryHTML += `
+                <div class="summary-total-square ${totalColorClass} text-white d-flex align-items-center justify-content-center">
+                    ${totalSum > 0 ? '+' : ''}${totalSum}
+                </div>
+            `;
+        }
+
         summaryHTML += '</div>';
         return summaryHTML;
     }
