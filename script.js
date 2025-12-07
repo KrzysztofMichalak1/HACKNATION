@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Simplified check: If it's the current player's turn and they have placed a bet, start the roll.
                 // The `isRolling` flag will prevent this from re-triggering.
                 if (currentPlayer && currentPlayer.hasPlacedBet) {
-                    startRoll(turnPlayerId);
+                    startRoll(turnPlayerId, currentPlayer.bet);
                 }
             }
 
@@ -371,7 +371,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function startRoll(rollerId) {
+    function startRoll(rollerId, bet) {
         const baseVal = Math.floor(Math.random() * 6) + 1;
         const rollDuration = 8000;
 
@@ -384,7 +384,8 @@ document.addEventListener('DOMContentLoaded', () => {
             influenceCost: 0,
             totalInfluenceCost: 0,
             influencedBy: [],
-            influences: null // Reset influence messages
+            influences: null, // Reset influence messages
+            bet: bet
         });
         
         // Ustaw timer kosztu wpływu (tylko host)
@@ -429,11 +430,11 @@ document.addEventListener('DOMContentLoaded', () => {
         const currentPlayerId = roll.rollerId;
         const currentPlayer = playersData[currentPlayerId];
         let betText = '';
-        if (currentPlayer && currentPlayer.bet) {
-            if (currentPlayer.bet.type === 'number') {
-                betText = `Zakład gracza: ${currentPlayer.name} postawił na ${currentPlayer.bet.value}`;
+        if (roll.bet) {
+            if (roll.bet.type === 'number') {
+                betText = `Zakład gracza: ${currentPlayer?.name} postawił na ${roll.bet.value}`;
             } else {
-                betText = `Zakład gracza: ${currentPlayer.name} postawił na ${currentPlayer.bet.type === 'even' ? 'Parzyste' : 'Nieparzyste'}`;
+                betText = `Zakład gracza: ${currentPlayer?.name} postawił na ${roll.bet.type === 'even' ? 'Parzyste' : 'Nieparzyste'}`;
             }
         }
         currentBetDisplay.textContent = betText;
