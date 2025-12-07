@@ -70,6 +70,38 @@ To nasz "Game Changer". Podczas gdy wirtualna kostka się obraca:
 
 ---
 
+## 🎲 Proceduralna Animacja Rzutu (Reverse Time Simulation)
+
+W przeciwieństwie do typowych gier hazardowych, gdzie rzut kostką jest odtwarzanym plikiem wideo, w **ZRZUTCE** każda trajektoria jest unikalna i generowana matematycznie w czasie rzeczywistym.
+
+Zastosowaliśmy zaawansowane podejście **Symulacji Wstecznej (Reverse Time Generation)**. Zamiast symulować rzut "w przód" i mieć nadzieję, że kostka upadnie na właściwą ściankę, zaczynamy od stanu końcowego (wylosowana ścianka leży płasko) i generujemy jej ruch wstecz w czasie, dodając stochastyczne zaburzenia.
+
+**Algorytm generowania ruchu:**
+
+1.  **Cel (Target):** Serwer ustala wynik (np. ścianka "6").
+2.  **Proces Stochastyczny:** Generujemy losowy proces Wienera dla logarytmu zmiany prędkości kątowej w osiach X i Y. Modelujemy to zależnością: $\log(dx(t)/t)$.
+3.  **Dyskretyzacja:** Otrzymujemy losowe funkcje $x(t)$ na zdyskretyzowanej przestrzeni czasu z krokiem $dt = 0.016$ s (częstotliwość 80Hz), co zapewnia idealną płynność animacji.
+4.  **Wizualizacja (Reverse Time):** Odwracamy wektor czasu. Matematyczne "rozhuśtanie się" kostki od spoczynku, wizualnie staje się naturalnym rzutem, który wytraca energię i **zawsze** idealnie ląduje na zadanym wyniku.
+
+Dzięki temu uzyskujemy efekt, w którym fizyka rzutu wygląda naturalnie i chaotycznie, ale wynik jest deterministyczny i zgodny z logiką gry.
+
+---
+
+## 🔮 Roadmap: Synchronizacja Trajektorii (Seed-based Sync)
+
+Obecnie, ze względu na architekturę "Client-Side Calculation", mimo że wynik końcowy jest ten sam dla wszystkich (synchronizowany przez Firebase), każdy gracz widzi inną, unikalną trajektorię lotu kostki (inny przebieg procesu Wienera na lokalnej maszynie).
+
+**Planowane rozwiązanie (Deterministic RNG):**
+Aby wprowadzić pełną synchronizację wizualną ("Widzę dokładnie ten sam obrót w powietrzu co Ty"), planujemy wdrożyć mechanizm oparty o **Seed Sharing**:
+
+1.  Host losuje `seed` (ziarno losowości) dla danej rundy.
+2.  `Seed` jest wysyłany do wszystkich graczy wraz z wynikiem rzutu przez WebSocket/Firebase.
+3.  Algorytm procesu Wienera na każdym urządzeniu klienckim, zasilony tym samym ziarnem, wygeneruje **identyczną trajektorię** ruchu $x(t)$.
+
+To pozwoli zachować lekkość obliczeń po stronie klienta (brak przesyłania ciężkich danych o pozycji klatka po klatce) przy jednoczesnym zapewnieniu identycznego doświadczenia wizualnego dla całej drużyny.
+
+---
+
 ## 🛠️ Technologie i Architektura
 
 Zdecydowaliśmy się na sprawdzony, lekki stack technologiczny ("Vanilla Web"). Dzięki temu aplikacja jest łatwo przenośna i działa natychmiastowo na dowolnym komputerze z przeglądarką, bez skomplikowanej konfiguracji środowiska.
