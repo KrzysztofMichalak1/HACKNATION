@@ -225,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateHeaderUI() {
         if (!gameData) return;
         roundDisplayEl.textContent = gameData.round;
-        sharedBudgetEl.textContent = `${gameData.sharedBudget} PLN`;
+        sharedBudgetEl.textContent = `${gameData.sharedBudget} PKT`;
 
         sharedBudgetEl.classList.remove('text-success', 'text-danger', 'fw-bold');
         if (gameData.sharedBudget > 100) sharedBudgetEl.classList.add('text-success', 'fw-bold');
@@ -596,15 +596,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const turnSummary = {
                 prize: {
-                    text: `Wygrana/Przegrana z zakładu: ${prize > 0 ? '+' : ''}${prize} PLN`,
+                    text: `Wygrana/Przegrana z zakładu: ${prize > 0 ? '+' : ''}${prize} PKT`,
                     value: prize
                 },
                 cost: {
-                    text: `Koszt wpływu: -${totalInfluenceCost} PLN`,
+                    text: `Koszt wpływu: -${totalInfluenceCost} PKT`,
                     value: totalInfluenceCost
                 },
                 total: {
-                    text: `Suma: ${budgetChange > 0 ? '+' : ''}${budgetChange} PLN`,
+                    text: `Suma: ${budgetChange > 0 ? '+' : ''}${budgetChange} PKT`,
                     value: budgetChange
                 }
             };
@@ -691,7 +691,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (entry.influences) {
                 influencesHTML += '<ul class="list-unstyled mt-2 mb-0">';
                 Object.values(entry.influences).forEach(influence => {
-                    influencesHTML += `<li><small class="text-muted ps-3">&rarr; ${influence.influencerName} wpłynął na rzut: ${influence.action} (koszt: ${influence.cost} PLN)</small></li>`;
+                    influencesHTML += `<li><small class="text-muted ps-3">&rarr; ${influence.influencerName} wpłynął na rzut: ${influence.action} (koszt: ${influence.cost} PKT)</small></li>`;
                 });
                 influencesHTML += '</ul>';
             }
