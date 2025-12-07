@@ -75,6 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const emailInputModal = document.getElementById('emailInputModal');
     const cashoutEmailInput = document.getElementById('cashout-email-input');
     const submitEmailBtn = document.getElementById('submit-email-btn');
+    const closeCashoutModalBtn = document.getElementById('close-cashout-modal-btn');
 
     // ======================================================
     // 3. LOGIKA LOBBY
@@ -1018,6 +1019,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const cashoutModal = document.getElementById('cashoutModal');
     if (cashoutModal) {
         cashoutModal.addEventListener('show.bs.modal', renderCashout);
+    }
+
+    if (closeCashoutModalBtn) {
+        closeCashoutModalBtn.addEventListener('click', () => {
+            // Close the cashout modal
+            const cashoutModalInstance = bootstrap.Modal.getInstance(cashoutModal);
+            if (cashoutModalInstance) {
+                cashoutModalInstance.hide();
+            }
+            // Restart the game
+            restartGame();
+        });
+    }
+
+    function restartGame() {
+        // Only the host can reset the game state
+        if (amIHost) {
+            db.ref("gameState").set({ status: "LOBBY" });
+            db.ref("players").set(null); // Clear all players
+        }
+        location.reload(); // Explicitly refresh the page
     }
 
     function renderCashout() {
